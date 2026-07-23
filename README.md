@@ -1,54 +1,64 @@
+# AraçApp - Mobil Araba ve Aksesuar Piyasası 🚗✨
 
-# Welcome to your Expo app 👋
+AraçApp, ikinci el ve sıfır araçların, araç içi/dışı aksesuarların, yedek parçaların alınıp satıldığı, gelişmiş arama ve karşılaştırma özelliklerine sahip olan tam teşekküllü bir mobil pazar yeri uygulamasıdır.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bu proje **React Native (Expo)** kullanılarak, modern mobil tasarım standartlarına (Glassmorphism, karanlık mod desteği, yumuşak animasyonlar) uygun şekilde geliştirilmiştir.
 
-## Get started
+## 🌟 Öne Çıkan Özellikler
 
-1. Install dependencies
+*   **Zengin ve Akıcı UI/UX:** Karanlık ve açık mod desteği, sayfa geçiş animasyonları ve platform bağımsız mükemmel uyumluluk.
+*   **Gerçek Zamanlı Karşılaştırma:** Hem araçları hem de aksesuarları aynı anda detaylı teknik tablo üzerinde yan yana karşılaştırma ekranı.
+*   **AraçApp Asistan (Chatbot):** Yapay zeka destekli görünüm sunan (kullanıcı dostu arayüzlü) interaktif chatbot asistanı. 
+*   **Tam Teşekküllü Yönetim Paneli (Admin Dashboard):** Yöneticiler için satış istatistikleri, stok uyarıları, sipariş yönetimi (bekleyen, iptal, teslim) ve detaylı stok kontrol modülleri.
+*   **Dinamik Sepet ve Sipariş Süreci:** Modern animasyonlarla zenginleştirilmiş sepet sistemi, sipariş onayı ve kargo takibi görselleştirmeleri.
+*   **Durum Yönetimi:** `Zustand` ile hızlı ve kalıcı (persisted) lokal veri tabanı yönetimi.
+*   **Eksiksiz Mobil Uyumluluk:** `SafeArea` kurallarına uyan çentikli ekran (notch) ve Android alt navigasyon (Klavye) için %100 düzeltilmiş form yönetimi.
 
+## 📱 Ekran Görüntüleri ve Görseller
+
+AraçApp, piyasadaki gerçek araba ve ürün görsellerini barındırır (BMW, Tesla, Audi, Mercedes, vb.) 
+- *Gerçek zamanlı resim entegrasyonu sayesinde her araç kendi modeliyle eşleşir.*
+
+## 🚀 Kurulum ve Çalıştırma
+
+Projeyi lokal bilgisayarınızda çalıştırmak için aşağıdaki adımları takip edin:
+
+### Ön Gereksinimler
+- Node.js (v18+)
+- Git
+- Expo Go uygulaması (Telefonunuzda)
+
+### Adımlar
+
+1. **Projeyi Klonlayın:**
    ```bash
-   npm install
+   git clone https://github.com/solmazgulecren-ux/AracApp.git
+   cd AracAppMobil
    ```
 
-2. Start the app
+2. **Bağımlılıkları Yükleyin:**
+   ```bash
+   npm install
+   # veya
+   npx expo install --fix
+   ```
 
+3. **Uygulamayı Başlatın:**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+4. **Kullanım:** Terminalde açılan QR kodu telefonunuzdaki **Expo Go** uygulamasıyla okutarak uygulamayı anında test edebilirsiniz. 
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠️ Kullanılan Teknolojiler
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+*   **React Native / Expo:** Ana framework ve geliştirme ortamı.
+*   **Expo Router:** Dosya tabanlı (file-based) modern sayfa yönlendirme (navigation).
+*   **Zustand:** Kalıcı ve performanslı durum yönetimi (State Management).
+*   **Reanimated & Moti:** Yüksek performanslı 60fps animasyonlar ve bileşen geçişleri.
+*   **Lucide Icons / Expo Vector Icons:** Vektörel ve yüksek çözünürlüklü ikon kütüphaneleri.
 
-## Get a fresh project
+## 👤 Geliştirici & Lisans
+Tasarım ve Geliştirme: **Solmaz Güleçren**
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
-# AracApp
-Araç alım, satım, kiralama gibi işlemleri hızlandırmak ve kullanıcı deneyimini geliştirmek için bir web sitesidir.
+Bu proje portfolyo amacı ile açık kaynaklı olarak geliştirilmiştir.

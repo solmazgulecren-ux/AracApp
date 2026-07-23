@@ -1,4 +1,4 @@
-import { Aksesuar, Araba } from '../tipler';
+import { Aksesuar, Araba, Kullanici } from '../tipler';
 import { MODEL_RESIMLERI, AKSESUAR_RESIMLERI } from './gorseller';
 
 const MARKALAR = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Nissan', 'Hyundai'];
