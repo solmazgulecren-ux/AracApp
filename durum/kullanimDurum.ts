@@ -1,8 +1,8 @@
-import { Kullanici } from "@/tipler/Kullanici";
+import { Kullanici } from "../tipler";
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { zustandDepolama } from '../araclar/veriTabani';
 import { sahteAksesuarlarUret, sahteArabalarUret, sahteKullanicilarUret } from '../araclar/sahteVeriUret';
+import { zustandDepolama } from '../araclar/veriTabani';
 import { Aksesuar, Araba, Favori, SepetUrun, Siparis, SiparisUrun } from '../tipler';
 
 export interface KullanimDurumTipi {
@@ -21,9 +21,11 @@ export interface KullanimDurumTipi {
   kayitOl: (kullanici: Omit<Kullanici, 'id'>) => void;
   profilGuncelle: (kullaniciId: string, guncelVeri: Partial<Kullanici>) => void;
   arabaEkle: (araba: Omit<Araba, 'id' | 'saticiId'>) => void;
+  arabaGuncelle: (arabaId: string, guncelVeri: Partial<Araba>) => boolean;
   arabaSil: (arabaId: string) => boolean;
   aksesuarEkle: (aksesuar: Omit<Aksesuar, 'id' | 'saticiId'>) => void;
   favoriDegistir: (arabaId: string) => void;
+  favoriAksesuarDegistir: (aksesuarId: string) => void;
   sepeteEkle: (aksesuarId: string) => void;
   sepettenCikar: (sepetId: string) => void;
   sepetAdetGuncelle: (sepetId: string, yeniAdet: number) => void;
@@ -37,6 +39,7 @@ export interface KullanimDurumTipi {
   siparisDurumuGuncelle: (siparisId: string, yeniDurum: Siparis['durum']) => void;
   stokGuncelle: (aksesuarId: string, yeniStok: number) => void;
   kullaniciKarsilastirmaListesi: () => string[];
+  sifreSifirla: (eposta: string, yeniSifre: string) => boolean;
 }
 
 export const useKullanimDurum = create<KullanimDurumTipi>()(
@@ -60,14 +63,25 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
         }
         return false;
       },
+      
+      sifreSifirla: (eposta, yeniSifre) => {
+        const kullanici = get().kullanicilar.find((k: Kullanici) => k.eposta === eposta);
+        if (kullanici) {
+          set((state: KullanimDurumTipi) => ({
+            kullanicilar: state.kullanicilar.map((k: Kullanici) => k.eposta === eposta ? { ...k, sifre: yeniSifre } : k)
+          }));
+          return true;
+        }
+        return false;
+      },
 
       cikisYap: () => {
         set({ aktifKullanici: null });
       },
 
       kayitOl: (kullaniciData) => {
-        const yeniKullanici: Kullanici = { 
-          ...kullaniciData, 
+        const yeniKullanici: Kullanici = {
+          ...kullaniciData,
           id: `kullanici-${Date.now()}`,
           kayitTarihi: new Date().toISOString().split('T')[0]
         };
@@ -97,6 +111,19 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
         set((state: KullanimDurumTipi) => ({
           arabalar: [yeniAraba, ...state.arabalar]
         }));
+      },
+
+      arabaGuncelle: (arabaId, guncelVeri) => {
+        const aktifKullanici = get().aktifKullanici;
+        if (!aktifKullanici) return false;
+
+        const araba = get().arabalar.find((a: Araba) => a.id === arabaId);
+        if (!araba || araba.saticiId !== aktifKullanici.id) return false;
+
+        set((state: KullanimDurumTipi) => ({
+          arabalar: state.arabalar.map((a: Araba) => a.id === arabaId ? { ...a, ...guncelVeri } : a)
+        }));
+        return true;
       },
 
       arabaSil: (arabaId) => {
@@ -148,6 +175,23 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
         }
       },
 
+      favoriAksesuarDegistir: (aksesuarId) => {
+        const aktifKullanici = get().aktifKullanici;
+        if (!aktifKullanici) return;
+
+        const mevcutFavori = get().favoriler.find((f: Favori) => f.kullaniciId === aktifKullanici.id && f.aksesuarId === aksesuarId);
+
+        if (mevcutFavori) {
+          set((state: KullanimDurumTipi) => ({
+            favoriler: state.favoriler.filter((f: Favori) => f.id !== mevcutFavori.id)
+          }));
+        } else {
+          set((state: KullanimDurumTipi) => ({
+            favoriler: [...state.favoriler, { id: `fav-${Date.now()}`, kullaniciId: aktifKullanici.id, aksesuarId }]
+          }));
+        }
+      },
+
       sepeteEkle: (aksesuarId) => {
         const aktifKullanici = get().aktifKullanici;
         if (!aktifKullanici) return;
@@ -156,7 +200,7 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
 
         if (mevcutUrun) {
           set((state: KullanimDurumTipi) => ({
-            sepet: state.sepet.map((s: SepetUrun) => 
+            sepet: state.sepet.map((s: SepetUrun) =>
               s.id === mevcutUrun.id ? { ...s, adet: s.adet + 1 } : s
             )
           }));
@@ -179,7 +223,7 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
           return;
         }
         set((state: KullanimDurumTipi) => ({
-          sepet: state.sepet.map((s: SepetUrun) => 
+          sepet: state.sepet.map((s: SepetUrun) =>
             s.id === sepetId ? { ...s, adet: yeniAdet } : s
           )
         }));
@@ -292,7 +336,7 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
 
       siparisDurumuGuncelle: (siparisId, yeniDurum) => {
         set((state: KullanimDurumTipi) => ({
-          siparisler: state.siparisler.map(s => 
+          siparisler: state.siparisler.map(s =>
             s.id === siparisId ? { ...s, durum: yeniDurum } : s
           )
         }));

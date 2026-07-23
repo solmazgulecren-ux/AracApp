@@ -13,6 +13,9 @@ export default function AksesuarEkrani() {
   const aksesuarlar = useKullanimDurum((state: KullanimDurumTipi) => state.aksesuarlar);
   const karanlikMod = useKullanimDurum((state: KullanimDurumTipi) => state.karanlikMod);
   const sepeteEkle = useKullanimDurum((state: KullanimDurumTipi) => state.sepeteEkle);
+  const favoriler = useKullanimDurum((state: KullanimDurumTipi) => state.favoriler);
+  const favoriAksesuarDegistir = useKullanimDurum((state: KullanimDurumTipi) => state.favoriAksesuarDegistir);
+  const aktifKullanici = useKullanimDurum((state: KullanimDurumTipi) => state.aktifKullanici);
   const tema = karanlikMod ? KoyuTema : AcikTema;
 
   const [aramaKelimesi, setAramaKelimesi] = useState('');
@@ -41,7 +44,10 @@ export default function AksesuarEkrani() {
     );
   };
 
-  const AksesuarKarti = ({ item, index }: { item: Aksesuar; index: number }) => (
+  const AksesuarKarti = ({ item, index }: { item: Aksesuar; index: number }) => {
+    const isFavori = favoriler.some(f => f.kullaniciId === aktifKullanici?.id && f.aksesuarId === item.id);
+    
+    return (
     <Animated.View entering={FadeInDown.delay(index * 60).springify().damping(18)}>
       <View style={[stiller.kart, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }, Platform.OS === 'web' && { maxWidth: 280, marginHorizontal: 8 }]}>
         <TouchableOpacity
@@ -60,10 +66,23 @@ export default function AksesuarEkrani() {
             </View>
           )}
           {item.stok <= 0 && (
-            <View style={[stiller.stokBadge, { backgroundColor: tema.uyariKirmizi }]}>
+            <View style={[stiller.stokBadge, { backgroundColor: tema.uyariKirmizi || '#EF4444' }]}>
               <Text style={stiller.stokBadgeMetni}>Tükendi</Text>
             </View>
           )}
+
+          <TouchableOpacity 
+            style={[stiller.favoriButon, { backgroundColor: tema.kartArkaplan }]}
+            onPress={() => {
+              if(!aktifKullanici) {
+                toastGosterGlobal('Önce giriş yapmalısınız', 'hata');
+                return;
+              }
+              favoriAksesuarDegistir(item.id);
+            }}
+          >
+            <Ionicons name={isFavori ? "heart" : "heart-outline"} size={16} color={isFavori ? tema.anaRenk : tema.metinAcik} />
+          </TouchableOpacity>
         </TouchableOpacity>
         <View style={stiller.kartIcerik}>
           <Text style={[stiller.baslik, { color: tema.metin }]} numberOfLines={2}>
@@ -93,14 +112,15 @@ export default function AksesuarEkrani() {
         </View>
       </View>
     </Animated.View>
-  );
+    );
+  };
 
   return (
     <View style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}>
       {/* Arama Alanı */}
       <View style={[stiller.aramaKutu, Platform.OS === 'web' && { maxWidth: 600, width: '100%', alignSelf: 'center' }]}>
-        <View style={[stiller.aramaIcerik, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
-          <Ionicons name="search" size={18} color={tema.metinAcik} />
+        <View style={[stiller.aramaIcerik, { backgroundColor: tema.kartArkaplan, borderColor: tema.anaRenk }]}>
+          <Ionicons name="search" size={18} color={tema.anaRenk} />
           <TextInput
             style={[stiller.aramaGirdi, { color: tema.metin }]}
             placeholder="Aksesuar ara..."
@@ -108,6 +128,11 @@ export default function AksesuarEkrani() {
             value={aramaKelimesi}
             onChangeText={setAramaKelimesi}
           />
+          {aramaKelimesi.length > 0 && (
+            <TouchableOpacity onPress={() => setAramaKelimesi('')}>
+              <Ionicons name="close-circle" size={18} color={tema.metinAcik} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -138,7 +163,10 @@ export default function AksesuarEkrani() {
               </Text>
             </TouchableOpacity>
           )}
-          contentContainerStyle={stiller.kategoriListe}
+          contentContainerStyle={[
+            stiller.kategoriListe,
+            Platform.OS === 'web' && { flexGrow: 1, justifyContent: 'center' }
+          ]}
         />
       </View>
 
@@ -201,12 +229,14 @@ const stiller = StyleSheet.create({
   },
   listeAlani: {
     padding: 8,
+    alignItems: 'center',
   },
   sutunlar: {
-    gap: 8,
+    gap: 12,
+    justifyContent: 'center',
   },
   kart: {
-    flex: 1,
+    width: Platform.OS === 'web' ? 260 : 170,
     borderRadius: 16,
     marginBottom: 8,
     overflow: 'hidden',
@@ -246,6 +276,21 @@ const stiller = StyleSheet.create({
     color: '#FFF',
     fontSize: 9,
     fontWeight: 'bold',
+  },
+  favoriButon: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   kartIcerik: {
     padding: 10,

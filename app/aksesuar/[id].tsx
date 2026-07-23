@@ -1,17 +1,20 @@
-import { Kullanici } from "@/tipler/Kullanici";
+import { Kullanici } from "../../tipler";
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Platform, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { toastGosterGlobal } from '../../bilesenler/ToastBildirim';
 import { AcikTema, KoyuTema } from '../../sabitler/Tema';
 import { KullanimDurumTipi, useKullanimDurum } from '../../durum/kullanimDurum';
 import { Aksesuar } from '../../tipler';
+import { UstMenu } from '../../bilesenler/UstMenu';
 
 export default function AksesuarDetayEkrani() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const genisEkran = Platform.OS === 'web' && width > 800;
 
   const aksesuarlar = useKullanimDurum((state: KullanimDurumTipi) => state.aksesuarlar);
   const kullanicilar = useKullanimDurum((state: KullanimDurumTipi) => state.kullanicilar);
@@ -69,109 +72,120 @@ export default function AksesuarDetayEkrani() {
   const stokRenk = aksesuar.stok <= 0 ? tema.uyariKirmizi : aksesuar.stok <= 10 ? tema.vurguRenk : tema.basari;
 
   return (
-    <ScrollView style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}>
-      {/* Görsel Alanı */}
-      <View style={stiller.resimKutu}>
-        <Image source={{ uri: aksesuar.resimler[0] }} style={stiller.resim} />
-        <TouchableOpacity style={stiller.geriButon} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        {aksesuar.kategori && (
-          <View style={[stiller.kategoriBadge, { backgroundColor: tema.ikincilRenk + 'DD' }]}>
-            <Text style={stiller.kategoriMetni}>{aksesuar.kategori}</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={stiller.icerik}>
-        {/* Başlık ve Fiyat */}
-        <Animated.View entering={FadeInUp.delay(100).springify()} style={stiller.baslikAlani}>
-          <Text style={[stiller.baslik, { color: tema.metin }]}>{aksesuar.ad}</Text>
-          <View style={[stiller.fiyatKutu, { backgroundColor: tema.anaRenk + '15' }]}>
-            <Text style={[stiller.fiyat, { color: tema.anaRenk }]}>{aksesuar.fiyat.toLocaleString('tr-TR')} ₺</Text>
-          </View>
-        </Animated.View>
-
-        {/* Durum ve Stok */}
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={stiller.badgeAlani}>
-          <View style={[stiller.durumBadge, aksesuar.durum === 'Sıfır' ? stiller.sifirBadge : stiller.ikinciElBadge]}>
-            <Ionicons name={aksesuar.durum === 'Sıfır' ? 'pricetag' : 'refresh'} size={14} color="#FFF" />
-            <Text style={stiller.durumMetni}>{aksesuar.durum}</Text>
-          </View>
-          <View style={[stiller.stokBadge, { backgroundColor: stokRenk + '18' }]}>
-            <View style={[stiller.stokNokta, { backgroundColor: stokRenk }]} />
-            <Text style={[stiller.stokMetin, { color: stokRenk }]}>
-              {aksesuar.stok <= 0 ? 'Tükendi' : `Stok: ${aksesuar.stok}`}
-            </Text>
-          </View>
-        </Animated.View>
-
-        {/* Açıklama */}
-        <Animated.View entering={FadeInDown.delay(300).springify()} style={[stiller.kutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
-          <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Ürün Açıklaması</Text>
-          <Text style={[stiller.aciklamaMetin, { color: tema.metinAcik }]}>{aksesuar.aciklama}</Text>
-        </Animated.View>
-
-        {/* Satıcı Bilgileri */}
-        {satici && (
-          <Animated.View entering={FadeInDown.delay(400).springify()} style={[stiller.kutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
-            <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Satıcı Bilgileri</Text>
-            <View style={stiller.saticiSatir}>
-              <View style={[stiller.saticiIkon, { backgroundColor: tema.ikincilRenk + '15' }]}>
-                <Ionicons name="person" size={16} color={tema.ikincilRenk} />
-              </View>
-              <Text style={[stiller.saticiMetin, { color: tema.metin }]}>{satici.ad} {satici.soyad}</Text>
+    <View style={{ flex: 1, backgroundColor: tema.arkaplan }}>
+      <UstMenu />
+      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingBottom: 40 }}>
+        <View style={[stiller.icerikKapsayici, genisEkran && stiller.icerikKapsayiciGenis]}>
+          
+          {/* SOL TARAF: Görsel Alanı */}
+          <View style={[stiller.gorselAlan, genisEkran && stiller.gorselAlanGenis]}>
+            <View style={stiller.resimKutu}>
+              <Image source={{ uri: aksesuar.resimler[0] }} style={stiller.resim} resizeMode="cover" />
+              <TouchableOpacity style={stiller.geriButon} onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color="#FFF" />
+              </TouchableOpacity>
+              {aksesuar.kategori && (
+                <View style={[stiller.kategoriBadge, { backgroundColor: tema.ikincilRenk + 'DD' }]}>
+                  <Text style={stiller.kategoriMetni}>{aksesuar.kategori}</Text>
+                </View>
+              )}
             </View>
-            <View style={stiller.saticiSatir}>
-              <View style={[stiller.saticiIkon, { backgroundColor: tema.basari + '15' }]}>
-                <Ionicons name="call" size={14} color={tema.basari} />
-              </View>
-              <Text style={[stiller.saticiMetin, { color: tema.metin }]}>{satici.telefon}</Text>
-            </View>
-            <View style={stiller.saticiSatir}>
-              <View style={[stiller.saticiIkon, { backgroundColor: tema.vurguRenk + '15' }]}>
-                <Ionicons name="star" size={14} color={tema.vurguRenk} />
-              </View>
-              <Text style={[stiller.saticiMetin, { color: tema.metin }]}>
-                {satici.puan} ({satici.degerlendirmeSayisi} değerlendirme)
-              </Text>
-            </View>
-          </Animated.View>
-        )}
+          </View>
 
-        {/* Aksyon Butonları */}
-        <Animated.View entering={FadeInDown.delay(500).springify()} style={stiller.butonAlani}>
-          <TouchableOpacity
-            style={[stiller.sepeteEkleButon, { backgroundColor: tema.vurguRenk, opacity: aksesuar.stok <= 0 ? 0.5 : 1 }]}
-            onPress={sepeteEkleIslemi}
-            activeOpacity={0.8}
-            disabled={aksesuar.stok <= 0}
-          >
-            <Ionicons name="cart" size={22} color="#FFF" />
-            <Text style={stiller.sepeteEkleMetin}>{aksesuar.stok <= 0 ? 'Stokta Yok' : 'Sepete Ekle'}</Text>
-          </TouchableOpacity>
+          {/* SAĞ TARAF: Bilgi ve İşlem Alanı */}
+          <View style={[stiller.bilgiAlan, genisEkran && stiller.bilgiAlanGenis]}>
+            <View style={stiller.icerik}>
+              {/* Başlık ve Fiyat */}
+              <Animated.View entering={FadeInUp.delay(100).springify()} style={stiller.baslikAlani}>
+                <Text style={[stiller.baslik, { color: tema.metin }]}>{aksesuar.ad}</Text>
+                <View style={[stiller.fiyatKutu, { backgroundColor: tema.anaRenk + '15' }]}>
+                  <Text style={[stiller.fiyat, { color: tema.anaRenk }]}>{aksesuar.fiyat.toLocaleString('tr-TR')} ₺</Text>
+                </View>
+              </Animated.View>
 
-          <TouchableOpacity
-            style={[
-              stiller.karsilastirButon,
-              { borderColor: tema.ikincilRenk },
-              karsilastirmadaMi && { backgroundColor: tema.ikincilRenk }
-            ]}
-            onPress={karsilastirIslemi}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name={karsilastirmadaMi ? 'checkmark-circle' : 'git-compare-outline'}
-              size={22}
-              color={karsilastirmadaMi ? '#FFF' : tema.ikincilRenk}
-            />
-            <Text style={[stiller.karsilastirMetin, { color: karsilastirmadaMi ? '#FFF' : tema.ikincilRenk }]}>
-              {karsilastirmadaMi ? 'Eklendi' : 'Karşılaştır'}
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-    </ScrollView>
+              {/* Durum ve Stok */}
+              <Animated.View entering={FadeInDown.delay(200).springify()} style={stiller.badgeAlani}>
+                <View style={[stiller.durumBadge, aksesuar.durum === 'Sıfır' ? stiller.sifirBadge : stiller.ikinciElBadge]}>
+                  <Ionicons name={aksesuar.durum === 'Sıfır' ? 'pricetag' : 'refresh'} size={14} color="#FFF" />
+                  <Text style={stiller.durumMetni}>{aksesuar.durum}</Text>
+                </View>
+                <View style={[stiller.stokBadge, { backgroundColor: stokRenk + '18' }]}>
+                  <View style={[stiller.stokNokta, { backgroundColor: stokRenk }]} />
+                  <Text style={[stiller.stokMetin, { color: stokRenk }]}>
+                    {aksesuar.stok <= 0 ? 'Tükendi' : `Stok: ${aksesuar.stok}`}
+                  </Text>
+                </View>
+              </Animated.View>
+
+              {/* Açıklama */}
+              <Animated.View entering={FadeInDown.delay(300).springify()} style={[stiller.kutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+                <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Ürün Açıklaması</Text>
+                <Text style={[stiller.aciklamaMetin, { color: tema.metinAcik }]}>{aksesuar.aciklama}</Text>
+              </Animated.View>
+
+              {/* Satıcı Bilgileri */}
+              {satici && (
+                <Animated.View entering={FadeInDown.delay(400).springify()} style={[stiller.kutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+                  <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Satıcı Bilgileri</Text>
+                  <View style={stiller.saticiSatir}>
+                    <View style={[stiller.saticiIkon, { backgroundColor: tema.ikincilRenk + '15' }]}>
+                      <Ionicons name="person" size={16} color={tema.ikincilRenk} />
+                    </View>
+                    <Text style={[stiller.saticiMetin, { color: tema.metin }]}>{satici.ad} {satici.soyad}</Text>
+                  </View>
+                  <View style={stiller.saticiSatir}>
+                    <View style={[stiller.saticiIkon, { backgroundColor: tema.basari + '15' }]}>
+                      <Ionicons name="call" size={14} color={tema.basari} />
+                    </View>
+                    <Text style={[stiller.saticiMetin, { color: tema.metin }]}>{satici.telefon}</Text>
+                  </View>
+                  <View style={stiller.saticiSatir}>
+                    <View style={[stiller.saticiIkon, { backgroundColor: tema.vurguRenk + '15' }]}>
+                      <Ionicons name="star" size={14} color={tema.vurguRenk} />
+                    </View>
+                    <Text style={[stiller.saticiMetin, { color: tema.metin }]}>
+                      {satici.puan} ({satici.degerlendirmeSayisi} değerlendirme)
+                    </Text>
+                  </View>
+                </Animated.View>
+              )}
+
+              {/* Aksyon Butonları */}
+              <Animated.View entering={FadeInDown.delay(500).springify()} style={stiller.butonAlani}>
+                <TouchableOpacity
+                  style={[stiller.sepeteEkleButon, { backgroundColor: tema.vurguRenk, opacity: aksesuar.stok <= 0 ? 0.5 : 1 }]}
+                  onPress={sepeteEkleIslemi}
+                  activeOpacity={0.8}
+                  disabled={aksesuar.stok <= 0}
+                >
+                  <Ionicons name="cart" size={22} color="#FFF" />
+                  <Text style={stiller.sepeteEkleMetin}>{aksesuar.stok <= 0 ? 'Stokta Yok' : 'Sepete Ekle'}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    stiller.karsilastirButon,
+                    { borderColor: tema.ikincilRenk },
+                    karsilastirmadaMi && { backgroundColor: tema.ikincilRenk }
+                  ]}
+                  onPress={karsilastirIslemi}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons
+                    name={karsilastirmadaMi ? 'checkmark-circle' : 'git-compare-outline'}
+                    size={22}
+                    color={karsilastirmadaMi ? '#FFF' : tema.ikincilRenk}
+                  />
+                  <Text style={[stiller.karsilastirMetin, { color: karsilastirmadaMi ? '#FFF' : tema.ikincilRenk }]}>
+                    {karsilastirmadaMi ? 'Eklendi' : 'Karşılaştır'}
+                  </Text>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -179,13 +193,42 @@ const stiller = StyleSheet.create({
   anaKutu: {
     flex: 1,
   },
+  icerikKapsayici: {
+    width: '100%',
+    flexDirection: 'column',
+  },
+  icerikKapsayiciGenis: {
+    flexDirection: 'row',
+    maxWidth: 1200,
+    marginTop: 20,
+    alignItems: 'flex-start',
+    gap: 24,
+    paddingHorizontal: 20,
+  },
+  gorselAlan: {
+    width: '100%',
+  },
+  gorselAlanGenis: {
+    flex: 1,
+    position: 'sticky' as any,
+    top: 20,
+  },
+  bilgiAlan: {
+    width: '100%',
+  },
+  bilgiAlanGenis: {
+    flex: 1,
+    padding: 0,
+  },
   hataMetni: {
     fontSize: 16,
     marginTop: 12,
   },
   resimKutu: {
     position: 'relative',
-    height: 300,
+    height: 350,
+    width: '100%',
+    ...(Platform.OS === 'web' && { borderRadius: 16, overflow: 'hidden' }),
   },
   resim: {
     width: '100%',
@@ -193,16 +236,16 @@ const stiller = StyleSheet.create({
   },
   geriButon: {
     position: 'absolute',
-    top: 44,
-    left: 16,
+    top: 20,
+    left: 20,
     backgroundColor: 'rgba(0,0,0,0.45)',
     padding: 10,
     borderRadius: 14,
   },
   kategoriBadge: {
     position: 'absolute',
-    bottom: 14,
-    left: 14,
+    bottom: 20,
+    left: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 12,
@@ -219,7 +262,7 @@ const stiller = StyleSheet.create({
     marginBottom: 14,
   },
   baslik: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 10,
   },
@@ -230,7 +273,7 @@ const stiller = StyleSheet.create({
     borderRadius: 12,
   },
   fiyat: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   badgeAlani: {

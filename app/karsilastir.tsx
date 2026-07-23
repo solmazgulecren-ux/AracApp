@@ -16,6 +16,7 @@ import {
 import { AcikTema, KoyuTema } from '../sabitler/Tema';
 import { Aksesuar, Araba } from '../tipler';
 import { KullanimDurumTipi, useKullanimDurum } from '../durum/kullanimDurum';
+import { UstMenu } from '../bilesenler/UstMenu';
 
 type KarsilastirmaOge = (Araba | Aksesuar) & { tur: 'araba' | 'aksesuar' };
 
@@ -35,7 +36,6 @@ export default function KarsilastirEkrani() {
   const [aramaKelimesi, setAramaKelimesi] = useState('');
   const [sekmeTip, setSekmeTip] = useState<'araba' | 'aksesuar'>('araba');
 
-  // Karşılaştırma listesindeki öğeleri bul
   const karsilastirmaOgeleri: KarsilastirmaOge[] = karsilastirmaListesi.map((id: string) => {
     const araba = arabalar.find((a: Araba) => a.id === id);
     if (araba) return { ...araba, tur: 'araba' as const };
@@ -44,16 +44,9 @@ export default function KarsilastirEkrani() {
     return null;
   }).filter(Boolean) as KarsilastirmaOge[];
 
-  // Modal arama sonuçları
   const aramaListesi = sekmeTip === 'araba'
-    ? arabalar.filter((a: Araba) =>
-        !karsilastirmaListesi.includes(a.id) &&
-        (`${a.marka} ${a.model}`.toLowerCase().includes(aramaKelimesi.toLowerCase()))
-      ).slice(0, 20)
-    : aksesuarlar.filter((a: Aksesuar) =>
-        !karsilastirmaListesi.includes(a.id) &&
-        a.ad.toLowerCase().includes(aramaKelimesi.toLowerCase())
-      ).slice(0, 20);
+    ? arabalar.filter((a: Araba) => !karsilastirmaListesi.includes(a.id) && (`${a.marka} ${a.model}`.toLowerCase().includes(aramaKelimesi.toLowerCase()))).slice(0, 20)
+    : aksesuarlar.filter((a: Aksesuar) => !karsilastirmaListesi.includes(a.id) && a.ad.toLowerCase().includes(aramaKelimesi.toLowerCase())).slice(0, 20);
 
   const ogeEkle = (id: string) => {
     if (karsilastirmaListesi.length < 4) {
@@ -63,217 +56,206 @@ export default function KarsilastirEkrani() {
     setAramaKelimesi('');
   };
 
-  // Karşılaştırma kartı
-  const KarsilastirmaKarti = ({ oge }: { oge: KarsilastirmaOge }) => {
-    const arabaOge = oge as Araba & { tur: string };
-    const aksesuarOge = oge as Aksesuar & { tur: string };
-    const arabamiDir = oge.tur === 'araba';
-
-    return (
-      <View style={[stiller.kartSutun, karanlikMod && stiller.kartSutunKaranlik]}>
-        {/* Çıkarma Butonu */}
-        <TouchableOpacity
-          style={stiller.cikarButon}
-          onPress={() => karsilastirmadanCikar(oge.id)}
-        >
-          <Ionicons name="close-circle" size={24} color={tema.ikincilRenk || "#FF3B30"} />
-        </TouchableOpacity>
-
-        <Image source={{ uri: oge.resimler[0] }} style={stiller.kartResim} />
-
-        <Text style={[stiller.kartBaslik, karanlikMod && stiller.metinKaranlik]} numberOfLines={2}>
-          {arabamiDir ? `${arabaOge.marka} ${arabaOge.model}` : aksesuarOge.ad}
-        </Text>
-
-        {/* Fiyat */}
-        <View style={stiller.ozellikSatir}>
-          <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Fiyat</Text>
-          <Text style={stiller.ozellikFiyat}>{oge.fiyat.toLocaleString('tr-TR')} ₺</Text>
-        </View>
-
-        {arabamiDir ? (
-          <>
-            <View style={stiller.ozellikSatir}>
-              <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Yıl</Text>
-              <Text style={[stiller.ozellikDeger, karanlikMod && stiller.metinKaranlik]}>{arabaOge.yil}</Text>
-            </View>
-            <View style={stiller.ozellikSatir}>
-              <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Kilometre</Text>
-              <Text style={[stiller.ozellikDeger, karanlikMod && stiller.metinKaranlik]}>{arabaOge.kilometre.toLocaleString('tr-TR')} km</Text>
-            </View>
-            <View style={stiller.ozellikSatir}>
-              <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Vites</Text>
-              <Text style={[stiller.ozellikDeger, karanlikMod && stiller.metinKaranlik]}>{arabaOge.vites}</Text>
-            </View>
-            <View style={stiller.ozellikSatir}>
-              <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Yakıt</Text>
-              <Text style={[stiller.ozellikDeger, karanlikMod && stiller.metinKaranlik]}>{arabaOge.yakitTuru}</Text>
-            </View>
-          </>
-        ) : (
-          <>
-            <View style={stiller.ozellikSatir}>
-              <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Durum</Text>
-              <Text style={[stiller.ozellikDeger, karanlikMod && stiller.metinKaranlik]}>{aksesuarOge.durum}</Text>
-            </View>
-            {aksesuarOge.kategori && (
-              <View style={stiller.ozellikSatir}>
-                <Text style={[stiller.ozellikEtiket, karanlikMod && stiller.metinSoluk]}>Kategori</Text>
-                <Text style={[stiller.ozellikDeger, karanlikMod && stiller.metinKaranlik]}>{aksesuarOge.kategori}</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* İncele Butonu */}
-        <TouchableOpacity
-          style={[stiller.inceleButon, { backgroundColor: tema.anaRenk }]}
-          onPress={() => router.push((arabamiDir ? `/araba/${oge.id}` : `/aksesuar/${oge.id}`) as any)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="eye-outline" size={16} color="#FFF" />
-          <Text style={stiller.inceleMetin}>İncele</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
+  const ButunOgelerAyniMi = karsilastirmaOgeleri.every(o => o.tur === 'araba') || karsilastirmaOgeleri.every(o => o.tur === 'aksesuar');
 
   return (
-    <View style={[
-      stiller.anaKutu, 
-      karanlikMod && stiller.anaKutuKaranlik,
-      Platform.OS === 'web' && { maxWidth: 1200, alignSelf: 'center', width: '100%', borderWidth: 1, borderColor: karanlikMod ? '#2A2A3E' : '#E4E7EB' }
-    ]}>
-      {/* Header */}
-      <View style={[stiller.baslikAlani, karanlikMod && stiller.baslikAlaniKaranlik]}>
+    <View style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}>
+      <UstMenu />
+
+      <View style={[stiller.baslikAlani, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
         <TouchableOpacity onPress={() => router.back()} style={stiller.geriButon}>
-          <Ionicons name="arrow-back" size={24} color={karanlikMod ? '#FFF' : '#333'} />
+          <Ionicons name="arrow-back" size={24} color={tema.metin} />
         </TouchableOpacity>
-        <Text style={[stiller.baslik, karanlikMod && stiller.metinKaranlik]}>Karşılaştırma</Text>
+        <Text style={[stiller.baslik, { color: tema.metin }]}>Karşılaştırma</Text>
         {karsilastirmaOgeleri.length > 0 && (
           <TouchableOpacity onPress={karsilastirmaTemizle} style={stiller.temizleButon}>
-            <Text style={stiller.temizleMetni}>Temizle</Text>
+            <Text style={{ color: tema.uyariKirmizi, fontWeight: 'bold' }}>Temizle</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Karşılaştırma İçeriği */}
       {karsilastirmaOgeleri.length === 0 ? (
         <View style={stiller.bosAlani}>
-          <Ionicons name="git-compare-outline" size={72} color={karanlikMod ? '#333' : '#DDD'} />
-          <Text style={[stiller.bosBaslik, karanlikMod && stiller.metinKaranlik]}>Karşılaştırma Listeniz Boş</Text>
-          <Text style={[stiller.bosAciklama, karanlikMod && stiller.metinSoluk]}>
+          <Ionicons name="git-compare-outline" size={72} color={tema.metinAcik} />
+          <Text style={[stiller.bosBaslik, { color: tema.metin }]}>Karşılaştırma Listeniz Boş</Text>
+          <Text style={[stiller.bosAciklama, { color: tema.metinAcik }]}>
             Araçları veya aksesuarları karşılaştırmak için aşağıdaki butona tıklayın.
           </Text>
-          <TouchableOpacity
-            style={[stiller.ekleButonBuyuk, { backgroundColor: tema.anaRenk }]}
-            onPress={() => setModalGorunur(true)}
-          >
+          <TouchableOpacity style={[stiller.ekleButonBuyuk, { backgroundColor: tema.anaRenk }]} onPress={() => setModalGorunur(true)}>
             <Ionicons name="add-circle" size={22} color="#FFF" />
             <Text style={stiller.ekleButonMetni}>Ürün Ekle</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <>
-          <ScrollView horizontal style={stiller.kaydirmaAlani} contentContainerStyle={stiller.kaydirmaIcerik}>
-            {karsilastirmaOgeleri.map((oge) => (
-              <KarsilastirmaKarti key={oge.id} oge={oge} />
-            ))}
+        <ScrollView style={stiller.kaydirmaAlani}>
+          {!ButunOgelerAyniMi && (
+             <View style={[stiller.uyariKutu, { backgroundColor: tema.uyariKirmizi + '15' }]}>
+                <Ionicons name="alert-circle" size={20} color={tema.uyariKirmizi} />
+                <Text style={{ color: tema.uyariKirmizi, flex: 1 }}>Araba ve aksesuarları aynı anda karşılaştırmak tablo düzenini bozabilir.</Text>
+             </View>
+          )}
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={stiller.tabloScroll}>
+            <View style={[stiller.tabloTasiyici, { borderColor: tema.kenarlik }]}>
+              
+              {/* Tablo Header (Resimler ve İsimler) */}
+              <View style={[stiller.tabloSatir, stiller.headerSatir, { borderBottomColor: tema.kenarlik }]}>
+                <View style={[stiller.tabloHucre, stiller.etiketHucre, { backgroundColor: tema.yuzeyRenk, borderRightColor: tema.kenarlik }]} />
+                {karsilastirmaOgeleri.map((oge) => (
+                  <View key={`header-${oge.id}`} style={[stiller.tabloHucre, stiller.degerHucre, { backgroundColor: tema.kartArkaplan, borderRightColor: tema.kenarlik }]}>
+                    <TouchableOpacity style={stiller.cikarButon} onPress={() => karsilastirmadanCikar(oge.id)}>
+                      <Ionicons name="close-circle" size={24} color={tema.uyariKirmizi} />
+                    </TouchableOpacity>
+                    <Image source={{ uri: oge.resimler[0] }} style={stiller.kartResim} />
+                    <Text style={[stiller.kartBaslik, { color: tema.metin }]} numberOfLines={2}>
+                      {oge.tur === 'araba' ? `${(oge as Araba).marka} ${(oge as Araba).model}` : (oge as Aksesuar).ad}
+                    </Text>
+                    <Text style={[stiller.fiyat, { color: tema.anaRenk }]}>{oge.fiyat.toLocaleString('tr-TR')} ₺</Text>
+                    <TouchableOpacity style={[stiller.inceleButon, { backgroundColor: tema.anaRenk }]} onPress={() => router.push((oge.tur === 'araba' ? `/araba/${oge.id}` : `/aksesuar/${oge.id}`) as any)}>
+                       <Text style={{ color: '#FFF', fontSize: 12, fontWeight: 'bold' }}>İncele</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+
+              {/* Fiyat Satırı */}
+              <View style={[stiller.tabloSatir, { borderBottomColor: tema.kenarlik }]}>
+                <View style={[stiller.tabloHucre, stiller.etiketHucre, { backgroundColor: tema.yuzeyRenk, borderRightColor: tema.kenarlik }]}>
+                  <Text style={[stiller.ozellikEtiket, { color: tema.metin }]}>Fiyat</Text>
+                </View>
+                {karsilastirmaOgeleri.map((oge) => (
+                  <View key={`fiyat-${oge.id}`} style={[stiller.tabloHucre, stiller.degerHucre, { backgroundColor: tema.kartArkaplan, borderRightColor: tema.kenarlik }]}>
+                    <Text style={[stiller.ozellikDeger, { color: tema.metin }]}>{oge.fiyat.toLocaleString('tr-TR')} ₺</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Araba Özellikleri */}
+              {['Yıl', 'Kilometre', 'Vites', 'Yakıt', 'Kasa Tipi', 'Motor', 'Hasar', 'Boya'].map(ozellik => {
+                // Eğer seçili öğelerde bu özellik hiçbiri için yoksa satırı gizle (sadece aksesuarlar varsa)
+                if (karsilastirmaOgeleri.every(o => o.tur !== 'araba')) return null;
+
+                return (
+                  <View key={ozellik} style={[stiller.tabloSatir, { borderBottomColor: tema.kenarlik }]}>
+                    <View style={[stiller.tabloHucre, stiller.etiketHucre, { backgroundColor: tema.yuzeyRenk, borderRightColor: tema.kenarlik }]}>
+                      <Text style={[stiller.ozellikEtiket, { color: tema.metin }]}>{ozellik}</Text>
+                    </View>
+                    {karsilastirmaOgeleri.map((oge) => {
+                      let deger = '-';
+                      if (oge.tur === 'araba') {
+                         const a = oge as Araba;
+                         switch (ozellik) {
+                           case 'Yıl': deger = a.yil.toString(); break;
+                           case 'Kilometre': deger = `${a.kilometre.toLocaleString('tr-TR')} km`; break;
+                           case 'Vites': deger = a.vites; break;
+                           case 'Yakıt': deger = a.yakitTuru; break;
+                           case 'Kasa Tipi': deger = a.kasaTipi || '-'; break;
+                           case 'Motor': deger = a.motorHacmi || '-'; break;
+                           case 'Hasar': deger = a.hasarKaydi || '-'; break;
+                           case 'Boya': deger = a.boyaliDegisen || '-'; break;
+                         }
+                      }
+                      return (
+                        <View key={`${ozellik}-${oge.id}`} style={[stiller.tabloHucre, stiller.degerHucre, { backgroundColor: tema.kartArkaplan, borderRightColor: tema.kenarlik }]}>
+                          <Text style={[stiller.ozellikDeger, { color: tema.metin }]}>{deger}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              })}
+
+              {/* Aksesuar Özellikleri */}
+              {['Kategori', 'Durum'].map(ozellik => {
+                if (karsilastirmaOgeleri.every(o => o.tur !== 'aksesuar')) return null;
+
+                return (
+                  <View key={ozellik} style={[stiller.tabloSatir, { borderBottomColor: tema.kenarlik }]}>
+                    <View style={[stiller.tabloHucre, stiller.etiketHucre, { backgroundColor: tema.yuzeyRenk, borderRightColor: tema.kenarlik }]}>
+                      <Text style={[stiller.ozellikEtiket, { color: tema.metin }]}>{ozellik}</Text>
+                    </View>
+                    {karsilastirmaOgeleri.map((oge) => {
+                      let deger = '-';
+                      if (oge.tur === 'aksesuar') {
+                         const a = oge as Aksesuar;
+                         switch (ozellik) {
+                           case 'Kategori': deger = a.kategori || '-'; break;
+                           case 'Durum': deger = a.durum; break;
+                         }
+                      }
+                      return (
+                        <View key={`${ozellik}-${oge.id}`} style={[stiller.tabloHucre, stiller.degerHucre, { backgroundColor: tema.kartArkaplan, borderRightColor: tema.kenarlik }]}>
+                          <Text style={[stiller.ozellikDeger, { color: tema.metin }]}>{deger}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              })}
+              
+            </View>
           </ScrollView>
 
           {karsilastirmaListesi.length < 4 && (
-            <TouchableOpacity
-              style={[stiller.ekleButonAlt, karanlikMod && stiller.ekleButonAltKaranlik, { borderColor: tema.anaRenk }]}
-              onPress={() => setModalGorunur(true)}
-            >
+            <TouchableOpacity style={[stiller.ekleButonAlt, { borderColor: tema.anaRenk, marginTop: 20 }]} onPress={() => setModalGorunur(true)}>
               <Ionicons name="add-circle-outline" size={22} color={tema.anaRenk} />
-              <Text style={[stiller.ekleButonAltMetni, { color: tema.anaRenk }]}>Karşılaştırmaya Ekle ({4 - karsilastirmaListesi.length} kalan)</Text>
+              <Text style={{ color: tema.anaRenk, fontWeight: 'bold' }}>Karşılaştırmaya Ekle ({4 - karsilastirmaListesi.length} kalan)</Text>
             </TouchableOpacity>
           )}
-        </>
+        </ScrollView>
       )}
 
       {/* Arama Modalı */}
-      <Modal
-        visible={modalGorunur}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalGorunur(false)}
-      >
+      <Modal visible={modalGorunur} animationType="slide" transparent={true} onRequestClose={() => setModalGorunur(false)}>
         <View style={stiller.modalArka}>
-          <View style={[stiller.modalIcerik, karanlikMod && stiller.modalIcerikKaranlik]}>
-            {/* Modal Header */}
-            <View style={stiller.modalBaslik}>
-              <Text style={[stiller.modalBaslikMetin, karanlikMod && stiller.metinKaranlik]}>Ürün Ekle</Text>
+          <View style={[stiller.modalIcerik, { backgroundColor: tema.kartArkaplan }]}>
+            <View style={stiller.modalBaslikKutu}>
+              <Text style={[stiller.modalBaslikMetin, { color: tema.metin }]}>Ürün Ekle</Text>
               <TouchableOpacity onPress={() => { setModalGorunur(false); setAramaKelimesi(''); }}>
-                <Ionicons name="close" size={28} color={karanlikMod ? '#FFF' : '#333'} />
+                <Ionicons name="close" size={28} color={tema.metin} />
               </TouchableOpacity>
             </View>
 
-            {/* Sekme Butonları */}
             <View style={stiller.sekmeler}>
-              <TouchableOpacity
-                style={[stiller.sekmeButon, sekmeTip === 'araba' && stiller.sekmeAktif]}
-                onPress={() => { setSekmeTip('araba'); setAramaKelimesi(''); }}
-              >
-                <Ionicons name="car" size={16} color={sekmeTip === 'araba' ? '#FFF' : '#666'} />
-                <Text style={[stiller.sekmeMetin, sekmeTip === 'araba' && stiller.sekmeMetinAktif]}>Araçlar</Text>
+              <TouchableOpacity style={[stiller.sekmeButon, sekmeTip === 'araba' && stiller.sekmeAktif, sekmeTip === 'araba' && { backgroundColor: tema.anaRenk }]} onPress={() => { setSekmeTip('araba'); setAramaKelimesi(''); }}>
+                <Ionicons name="car" size={16} color={sekmeTip === 'araba' ? '#FFF' : tema.metinAcik} />
+                <Text style={[stiller.sekmeMetin, { color: tema.metinAcik }, sekmeTip === 'araba' && { color: '#FFF' }]}>Araçlar</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[stiller.sekmeButon, sekmeTip === 'aksesuar' && stiller.sekmeAktif]}
-                onPress={() => { setSekmeTip('aksesuar'); setAramaKelimesi(''); }}
-              >
-                <Ionicons name="construct" size={16} color={sekmeTip === 'aksesuar' ? '#FFF' : '#666'} />
-                <Text style={[stiller.sekmeMetin, sekmeTip === 'aksesuar' && stiller.sekmeMetinAktif]}>Aksesuarlar</Text>
+              <TouchableOpacity style={[stiller.sekmeButon, sekmeTip === 'aksesuar' && stiller.sekmeAktif, sekmeTip === 'aksesuar' && { backgroundColor: tema.anaRenk }]} onPress={() => { setSekmeTip('aksesuar'); setAramaKelimesi(''); }}>
+                <Ionicons name="construct" size={16} color={sekmeTip === 'aksesuar' ? '#FFF' : tema.metinAcik} />
+                <Text style={[stiller.sekmeMetin, { color: tema.metinAcik }, sekmeTip === 'aksesuar' && { color: '#FFF' }]}>Aksesuarlar</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Arama */}
-            <View style={[stiller.modalArama, karanlikMod && stiller.modalAramaKaranlik]}>
-              <Ionicons name="search" size={18} color="#999" />
+            <View style={[stiller.modalArama, { backgroundColor: tema.yuzeyRenk }]}>
+              <Ionicons name="search" size={18} color={tema.metinAcik} />
               <TextInput
-                style={[stiller.modalAramaGirdi, karanlikMod && { color: '#FFF' }]}
+                style={[stiller.modalAramaGirdi, { color: tema.metin }]}
                 placeholder={sekmeTip === 'araba' ? 'Marka veya model ara...' : 'Aksesuar ara...'}
-                placeholderTextColor="#999"
+                placeholderTextColor={tema.metinAcik}
                 value={aramaKelimesi}
                 onChangeText={setAramaKelimesi}
               />
             </View>
 
-            {/* Sonuçlar */}
             <FlatList
               data={aramaListesi as any[]}
               keyExtractor={(item: any) => item.id}
               renderItem={({ item }: { item: any }) => {
                 const arabamiDir = sekmeTip === 'araba';
-                const arabaItem = item as Araba;
-                const aksesuarItem = item as Aksesuar;
-
+                const resim = item.resimler[0];
                 return (
-                  <TouchableOpacity
-                    style={[stiller.modalSonucKart, karanlikMod && stiller.modalSonucKartKaranlik]}
-                    onPress={() => ogeEkle(item.id)}
-                  >
-                    <Image source={{ uri: item.resimler[0] }} style={stiller.modalSonucResim} />
-                    <View style={stiller.modalSonucIcerik}>
-                      <Text style={[stiller.modalSonucBaslik, karanlikMod && stiller.metinKaranlik]} numberOfLines={1}>
-                        {arabamiDir ? `${arabaItem.marka} ${arabaItem.model}` : aksesuarItem.ad}
-                      </Text>
-                      <Text style={[stiller.modalSonucFiyat, { color: tema.anaRenk }]}>{item.fiyat.toLocaleString('tr-TR')} ₺</Text>
-                      {arabamiDir && (
-                        <Text style={stiller.modalSonucDetay}>{arabaItem.yil} • {arabaItem.vites}</Text>
-                      )}
+                  <TouchableOpacity style={[stiller.modalOgeKart, { borderBottomColor: tema.kenarlik }]} onPress={() => ogeEkle(item.id)}>
+                    <Image source={{ uri: resim }} style={stiller.modalOgeResim} />
+                    <View style={stiller.modalOgeBilgi}>
+                      <Text style={[stiller.modalOgeAd, { color: tema.metin }]} numberOfLines={1}>{arabamiDir ? `${item.marka} ${item.model}` : item.ad}</Text>
+                      <Text style={[stiller.modalOgeFiyat, { color: tema.anaRenk }]}>{item.fiyat.toLocaleString('tr-TR')} ₺</Text>
                     </View>
-                    <Ionicons name="add-circle" size={28} color={tema.anaRenk} />
+                    <Ionicons name="add-circle" size={24} color={tema.anaRenk} />
                   </TouchableOpacity>
                 );
               }}
-              contentContainerStyle={stiller.modalListe}
-              ListEmptyComponent={
-                <View style={stiller.bosModal}>
-                  <Text style={[stiller.bosModalMetin, karanlikMod && stiller.metinSoluk]}>Sonuç bulunamadı</Text>
-                </View>
-              }
+              ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20, color: tema.metinAcik }}>Sonuç bulunamadı.</Text>}
             />
           </View>
         </View>
@@ -283,105 +265,56 @@ export default function KarsilastirEkrani() {
 }
 
 const stiller = StyleSheet.create({
-  anaKutu: { flex: 1, backgroundColor: '#F0F2F5' },
-  anaKutuKaranlik: { backgroundColor: '#0A0A0C' },
-  baslikAlani: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    paddingTop: 50,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
-  baslikAlaniKaranlik: { backgroundColor: '#1C1C24', borderBottomColor: '#2D2D3A' },
-  geriButon: { marginRight: 12, padding: 4 },
-  baslik: { fontSize: 22, fontWeight: 'bold', color: '#111111', flex: 1 },
+  anaKutu: { flex: 1 },
+  baslikAlani: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 50, borderBottomWidth: 1 },
+  geriButon: { marginRight: 15 },
+  baslik: { fontSize: 24, fontWeight: 'bold', flex: 1 },
   temizleButon: { padding: 8 },
-  temizleMetni: { color: '#D32F2F', fontWeight: '600', fontSize: 14 },
-  // Boş alan
+  
   bosAlani: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
-  bosBaslik: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 20 },
-  bosAciklama: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8, lineHeight: 20 },
-  ekleButonBuyuk: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#D32F2F', paddingHorizontal: 24, paddingVertical: 14,
-    borderRadius: 14, marginTop: 24, elevation: 3,
-  },
-  ekleButonMetni: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
-  // Karşılaştırma kartları
+  bosBaslik: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, textAlign: 'center' },
+  bosAciklama: { fontSize: 16, textAlign: 'center', lineHeight: 24, marginBottom: 30 },
+  ekleButonBuyuk: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 30, gap: 8 },
+  ekleButonMetni: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+  
   kaydirmaAlani: { flex: 1 },
-  kaydirmaIcerik: { padding: 15, gap: 12 },
-  kartSutun: {
-    width: 220, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 12,
-    elevation: 3, shadowColor: '#FF2A2A', shadowOpacity: 0.1, shadowRadius: 8,
-  },
-  kartSutunKaranlik: { backgroundColor: '#1C1C24' },
-  cikarButon: { position: 'absolute', top: 8, right: 8, zIndex: 10 },
-  kartResim: { width: '100%', height: 130, borderRadius: 10, marginBottom: 12 },
-  kartBaslik: { fontSize: 16, fontWeight: 'bold', color: '#111111', marginBottom: 12, textAlign: 'center' },
-  ozellikSatir: {
-    flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
-  },
-  ozellikEtiket: { fontWeight: '600', color: '#606060', fontSize: 13 },
-  ozellikDeger: { fontWeight: 'bold', color: '#111111', fontSize: 13 },
-  ozellikFiyat: { fontWeight: 'bold', color: '#D32F2F', fontSize: 15 },
-  inceleButon: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#D32F2F', paddingVertical: 10, borderRadius: 10,
-    gap: 6, marginTop: 12,
-  },
-  inceleMetin: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
-  // Ekle butonu alt
-  ekleButonAlt: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    margin: 15, padding: 14, borderRadius: 14, borderWidth: 2,
-    borderColor: '#D32F2F', borderStyle: 'dashed', gap: 8,
-    marginBottom: 30,
-  },
-  ekleButonAltKaranlik: { borderColor: '#FF2A2A' },
-  ekleButonAltMetni: { color: '#D32F2F', fontWeight: '600', fontSize: 14 },
-  // Modal
+  uyariKutu: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 12, borderRadius: 12, gap: 8 },
+  
+  tabloScroll: { padding: 16, paddingBottom: 40 },
+  tabloTasiyici: { borderRadius: 16, overflow: 'hidden', borderWidth: 1, backgroundColor: '#FFF' },
+  tabloSatir: { flexDirection: 'row', borderBottomWidth: 1 },
+  headerSatir: { alignItems: 'flex-start' },
+  tabloHucre: { padding: 16, borderRightWidth: 1, justifyContent: 'center' },
+  etiketHucre: { width: 90, alignItems: 'flex-start' },
+  degerHucre: { width: 130, alignItems: 'center' },
+  
+  cikarButon: { position: 'absolute', top: 4, right: 4, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 12 },
+  kartResim: { width: 100, height: 70, borderRadius: 8, marginBottom: 8, resizeMode: 'cover' },
+  kartBaslik: { fontSize: 13, fontWeight: 'bold', textAlign: 'center', marginBottom: 4, height: 36 },
+  fiyat: { fontSize: 14, fontWeight: 'bold', marginBottom: 8 },
+  inceleButon: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, width: '95%', alignItems: 'center' },
+  
+  ozellikEtiket: { fontSize: 12, fontWeight: 'bold' },
+  ozellikDeger: { fontSize: 12, textAlign: 'center', fontWeight: '500' },
+  
+  ekleButonAlt: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, marginHorizontal: 16, marginBottom: 40, borderRadius: 12, borderWidth: 2, borderStyle: 'dashed', gap: 8 },
+  
   modalArka: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalIcerik: {
-    backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    maxHeight: '80%', paddingBottom: 30,
-  },
-  modalIcerikKaranlik: { backgroundColor: '#1A1A2E' },
-  modalBaslik: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, borderBottomWidth: 1, borderBottomColor: '#EEE',
-  },
-  modalBaslikMetin: { fontSize: 20, fontWeight: 'bold', color: '#111111' },
-  sekmeler: { flexDirection: 'row', padding: 15, gap: 10 },
-  sekmeButon: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingVertical: 10, borderRadius: 10, backgroundColor: '#F0F2F5', gap: 6,
-  },
-  sekmeAktif: { backgroundColor: '#D32F2F' },
-  sekmeMetin: { fontSize: 14, fontWeight: '600', color: '#606060' },
-  sekmeMetinAktif: { color: '#FFF' },
-  modalArama: {
-    flexDirection: 'row', alignItems: 'center', marginHorizontal: 15,
-    backgroundColor: '#F5F5F5', borderRadius: 12, paddingHorizontal: 12,
-    paddingVertical: 10, gap: 8, marginBottom: 10,
-  },
-  modalAramaKaranlik: { backgroundColor: '#0F0F1A' },
-  modalAramaGirdi: { flex: 1, fontSize: 15, color: '#333' },
-  modalListe: { paddingHorizontal: 15, paddingBottom: 20 },
-  modalSonucKart: {
-    flexDirection: 'row', alignItems: 'center', padding: 10,
-    borderRadius: 12, backgroundColor: '#F0F2F5', marginBottom: 8,
-  },
-  modalSonucKartKaranlik: { backgroundColor: '#0A0A0C' },
-  modalSonucResim: { width: 55, height: 55, borderRadius: 10, marginRight: 12 },
-  modalSonucIcerik: { flex: 1 },
-  modalSonucBaslik: { fontSize: 14, fontWeight: 'bold', color: '#111111' },
-  modalSonucFiyat: { fontSize: 13, fontWeight: 'bold', color: '#D32F2F', marginTop: 2 },
-  modalSonucDetay: { fontSize: 12, color: '#606060', marginTop: 2 },
-  bosModal: { padding: 40, alignItems: 'center' },
-  bosModalMetin: { fontSize: 15, color: '#9E9E9E' },
-  metinKaranlik: { color: '#F0F2F5' },
-  metinSoluk: { color: '#9E9E9E' },
+  modalIcerik: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, height: '80%' },
+  modalBaslikKutu: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalBaslikMetin: { fontSize: 20, fontWeight: 'bold' },
+  
+  sekmeler: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 12, padding: 4, marginBottom: 15 },
+  sekmeButon: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 10, gap: 6 },
+  sekmeAktif: {},
+  sekmeMetin: { fontSize: 14, fontWeight: '600' },
+  
+  modalArama: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, paddingVertical: 12, borderRadius: 12, marginBottom: 15, gap: 10 },
+  modalAramaGirdi: { flex: 1, fontSize: 16 },
+  
+  modalOgeKart: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
+  modalOgeResim: { width: 60, height: 60, borderRadius: 8, marginRight: 15 },
+  modalOgeBilgi: { flex: 1 },
+  modalOgeAd: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  modalOgeFiyat: { fontSize: 15, fontWeight: 'bold' }
 });

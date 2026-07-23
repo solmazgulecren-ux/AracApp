@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+import { toastGosterGlobal } from '../bilesenler/ToastBildirim';
 import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { AcikTema, KoyuTema } from '../sabitler/Tema';
@@ -22,6 +23,7 @@ export default function GirisEkrani() {
   const girisIslemi = () => {
     const basarili = girisYap(eposta, sifre);
     if (basarili) {
+      toastGosterGlobal('Başarıyla giriş yapıldı.', 'basari');
       router.replace('/(sekmeler)/ilanlar');
     } else {
       setHata('Hatalı e-posta veya şifre.');
@@ -91,16 +93,24 @@ export default function GirisEkrani() {
             onPress={girisIslemi}
             activeOpacity={0.85}
           >
-            <Ionicons name="log-in-outline" size={22} color="#FFF" />
+            <Ionicons name="log-in-outline" size={20} color="#FFF" />
             <Text style={stiller.butonMetni}>Giriş Yap</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={stiller.kayitLink} onPress={() => router.push('/kayit')}>
-            <Text style={[stiller.kayitMetni, { color: tema.metinAcik }]}>
-              Hesabın yok mu?{' '}
-              <Text style={{ color: tema.anaRenk, fontWeight: 'bold' }}>Kayıt Ol</Text>
-            </Text>
-          </TouchableOpacity>
+          <View style={stiller.linklerKutu}>
+            <TouchableOpacity onPress={() => router.push('/sifremi-unuttum')}>
+              <Text style={[stiller.kayitMetni, { color: tema.metinAcik }]}>
+                Şifremi Unuttum
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={() => router.push('/kayit')}>
+              <Text style={[stiller.kayitMetni, { color: tema.metinAcik }]}>
+                Hesabın yok mu?{' '}
+                <Text style={{ color: tema.anaRenk, fontWeight: 'bold' }}>Kayıt Ol</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Animated.View>
 
@@ -162,25 +172,31 @@ const stiller = StyleSheet.create({
   formAlani: {
     flex: 1,
     paddingHorizontal: 24,
+    alignItems: 'center',
+    width: '100%',
   },
   formKart: {
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 16,
+    padding: 32,
     borderWidth: 1,
-    elevation: 8,
+    width: '100%',
+    maxWidth: 420,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   formBaslik: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 6,
+    textAlign: 'center',
   },
   formAltBaslik: {
     fontSize: 14,
-    marginBottom: 20,
+    marginBottom: 24,
+    textAlign: 'center',
   },
   hataKutu: {
     flexDirection: 'row',
@@ -199,46 +215,47 @@ const stiller = StyleSheet.create({
     flex: 1,
   },
   girdiKutu: {
-    gap: 12,
-    marginBottom: 20,
+    gap: 16,
+    marginBottom: 24,
   },
   girdiWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    gap: 10,
+    gap: 12,
   },
   girdi: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
   },
   girisButon: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 14,
+    paddingVertical: 14,
+    borderRadius: 12,
     gap: 8,
-    elevation: 4,
-    shadowColor: '#E63946',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   butonMetni: {
     color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 17,
+    fontSize: 15,
   },
-  kayitLink: {
-    marginTop: 20,
+  linklerKutu: {
+    marginTop: 24,
     alignItems: 'center',
+    gap: 16,
   },
   kayitMetni: {
-    fontSize: 14,
+    fontSize: 13,
   },
   altBilgi: {
     paddingBottom: 40,

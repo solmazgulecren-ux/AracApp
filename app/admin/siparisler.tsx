@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,13 @@ export default function SiparislerYonetim() {
   const siparisDurumuGuncelle = useKullanimDurum((state: KullanimDurumTipi) => state.siparisDurumuGuncelle);
   const tema = karanlikMod ? KoyuTema : AcikTema;
   const insets = useSafeAreaInsets();
+  
+  const [seciliFiltre, setSeciliFiltre] = useState<string | null>(null);
+
+  const filtreliSiparisler = useMemo(() => {
+    if (!seciliFiltre || seciliFiltre === 'Toplam') return siparisler;
+    return siparisler.filter(s => s.durum === seciliFiltre);
+  }, [siparisler, seciliFiltre]);
 
   const getKullaniciAd = (kullaniciId: string) => {
     const k = kullanicilar.find(u => u.id === kullaniciId);
@@ -51,6 +58,28 @@ export default function SiparislerYonetim() {
 
   const siparisKartRender = ({ item, index }: { item: Siparis; index: number }) => {
     const durumBilgi = durumIkonu(item.durum);
+    
+    // Eğer filtre aktifse daha kompakt (küçük kutucuk) görünüm
+    if (seciliFiltre && seciliFiltre !== 'Toplam') {
+      return (
+        <Animated.View entering={FadeInDown.delay(index * 50).springify().damping(18)} style={{ flex: 1, margin: 8 }}>
+          <View style={[stiller.kart, stiller.kompaktKart, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+            <View style={stiller.kompaktUst}>
+              <Text style={[stiller.siparisId, { color: tema.anaRenk }]}>#{item.id.split('-')[1]}</Text>
+              <Ionicons name={durumBilgi.ikon} size={16} color={durumBilgi.renk} />
+            </View>
+            <Text style={[stiller.detayMetin, { color: tema.metin, marginVertical: 6 }]} numberOfLines={1}>
+              {getKullaniciAd(item.kullaniciId)}
+            </Text>
+            <Text style={[stiller.detayMetin, { color: tema.vurguRenk, fontWeight: 'bold' }]}>
+              {item.toplamTutar.toLocaleString('tr-TR')} ₺
+            </Text>
+          </View>
+        </Animated.View>
+      );
+    }
+
+    // Normal detaylı görünüm
     return (
       <Animated.View entering={FadeInDown.delay(index * 80).springify().damping(18)}>
         <View style={[stiller.kart, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }, karanlikMod ? NeonGlow : Golge]}>
@@ -164,36 +193,53 @@ export default function SiparislerYonetim() {
 
   return (
     <View style={[stiller.kapsayici, { backgroundColor: tema.arkaplan }]}>
-      {/* İstatistik Başlık */}
+      {/* İstatistik Başlık (Filtreler) */}
       <View style={[stiller.istatistikAlani, { backgroundColor: tema.kartArkaplan }]}>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.basari + '15' }]}>
-          <Text style={[stiller.istatistikSayi, { color: tema.basari }]}>
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.basari + (seciliFiltre === 'Teslim Edildi' ? '30' : '15'), borderColor: seciliFiltre === 'Teslim Edildi' ? tema.basari : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre(seciliFiltre === 'Teslim Edildi' ? null : 'Teslim Edildi')}
+        >
+          <Text style={[stiller.istatistikSayi, { color: tema.basari }]} numberOfLines={1} adjustsFontSizeToFit>
             {siparisler.filter(s => s.durum === 'Teslim Edildi').length}
           </Text>
-          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Teslim</Text>
-        </View>
-        <View style={[stiller.istatistikKart, { backgroundColor: '#F59E0B15' }]}>
-          <Text style={[stiller.istatistikSayi, { color: '#F59E0B' }]}>
+          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]} numberOfLines={1} adjustsFontSizeToFit>Teslim</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: '#F59E0B' + (seciliFiltre === 'Onay Bekliyor' ? '30' : '15'), borderColor: seciliFiltre === 'Onay Bekliyor' ? '#F59E0B' : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre(seciliFiltre === 'Onay Bekliyor' ? null : 'Onay Bekliyor')}
+        >
+          <Text style={[stiller.istatistikSayi, { color: '#F59E0B' }]} numberOfLines={1} adjustsFontSizeToFit>
             {siparisler.filter(s => s.durum === 'Onay Bekliyor').length}
           </Text>
-          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Bekleyen</Text>
-        </View>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.uyariKirmizi + '15' }]}>
-          <Text style={[stiller.istatistikSayi, { color: tema.uyariKirmizi }]}>
+          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]} numberOfLines={1} adjustsFontSizeToFit>Bekleyen</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.uyariKirmizi + (seciliFiltre === 'İptal Edildi' ? '30' : '15'), borderColor: seciliFiltre === 'İptal Edildi' ? tema.uyariKirmizi : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre(seciliFiltre === 'İptal Edildi' ? null : 'İptal Edildi')}
+        >
+          <Text style={[stiller.istatistikSayi, { color: tema.uyariKirmizi }]} numberOfLines={1} adjustsFontSizeToFit>
             {siparisler.filter(s => s.durum === 'İptal Edildi').length}
           </Text>
-          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>İptal</Text>
-        </View>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.ikincilRenk + '15' }]}>
-          <Text style={[stiller.istatistikSayi, { color: tema.ikincilRenk }]}>
+          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]} numberOfLines={1} adjustsFontSizeToFit>İptal</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.ikincilRenk + (seciliFiltre === 'Toplam' ? '30' : '15'), borderColor: seciliFiltre === 'Toplam' ? tema.ikincilRenk : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre(null)}
+        >
+          <Text style={[stiller.istatistikSayi, { color: tema.ikincilRenk }]} numberOfLines={1} adjustsFontSizeToFit>
             {siparisler.length}
           </Text>
-          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Toplam</Text>
-        </View>
+          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]} numberOfLines={1} adjustsFontSizeToFit>Tümü</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
-        data={siparisler}
+        key={seciliFiltre ? 'grid' : 'list'}
+        numColumns={seciliFiltre && seciliFiltre !== 'Toplam' ? 2 : 1}
+        data={filtreliSiparisler}
         keyExtractor={item => item.id}
         renderItem={siparisKartRender}
         contentContainerStyle={[stiller.liste, { paddingBottom: insets.bottom + 20 }]}
@@ -214,11 +260,13 @@ const stiller = StyleSheet.create({
   },
   istatistikAlani: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     padding: 12,
     gap: 8,
   },
   istatistikKart: {
     flex: 1,
+    minWidth: '45%',
     alignItems: 'center',
     paddingVertical: 12,
     borderRadius: 12,
@@ -247,6 +295,17 @@ const stiller = StyleSheet.create({
         width: '100%' as any,
       }
     })
+  },
+  kompaktKart: {
+    padding: 12,
+    borderWidth: 1,
+    minHeight: 90,
+    justifyContent: 'space-between',
+  },
+  kompaktUst: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   kartBaslik: {
     flexDirection: 'row',

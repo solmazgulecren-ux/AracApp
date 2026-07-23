@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { AcikTema, KoyuTema } from '../sabitler/Tema';
 import { useKullanimDurum, KullanimDurumTipi } from '../durum/kullanimDurum';
+import { toastGosterGlobal } from '../bilesenler/ToastBildirim';
 
 export default function KayitEkrani() {
   const router = useRouter();
@@ -27,6 +28,23 @@ export default function KayitEkrani() {
       return;
     }
 
+    if (!eposta.includes('@') || !eposta.includes('.')) {
+      setHata('Lütfen geçerli bir e-posta adresi girin.');
+      return;
+    }
+
+    if (sifre.length < 6) {
+      setHata('Şifreniz en az 6 karakter olmalıdır.');
+      return;
+    }
+
+    if (telefon.length < 10) {
+      setHata('Lütfen geçerli bir telefon numarası girin.');
+      return;
+    }
+
+    setHata('');
+    
     kayitOl({
       ad,
       soyad,
@@ -35,10 +53,14 @@ export default function KayitEkrani() {
       eposta,
       sifre,
       puan: 0,
-      degerlendirmeSayisi: 0
+      degerlendirmeSayisi: 0,
+      kayitTarihi: new Date().toISOString()
     });
 
-    router.replace('/(sekmeler)/ilanlar');
+    toastGosterGlobal('Kayıt Başarılı, yönlendiriliyorsunuz...', 'basari');
+    setTimeout(() => {
+      router.replace('/(sekmeler)/ilanlar');
+    }, 1500);
   };
 
   const alanlar = [
@@ -51,8 +73,12 @@ export default function KayitEkrani() {
   ];
 
   return (
-    <View style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}>
-      <TouchableOpacity style={[stiller.temaButon, { backgroundColor: tema.kartArkaplan + '90' }]} onPress={temaDegistir}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}
+    >
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+        <TouchableOpacity style={[stiller.temaButon, { backgroundColor: tema.kartArkaplan + '90' }]} onPress={temaDegistir}>
         <Ionicons name={karanlikMod ? 'sunny' : 'moon'} size={22} color={tema.metin} />
       </TouchableOpacity>
 
@@ -61,7 +87,7 @@ export default function KayitEkrani() {
       </TouchableOpacity>
 
       <Animated.View entering={FadeInUp.delay(100).springify()} style={stiller.baslikAlani}>
-        <View style={[stiller.logoKutu, { backgroundColor: tema.basari }]}>
+        <View style={[stiller.logoKutu, { backgroundColor: tema.anaRenk }]}>
           <Ionicons name="person-add" size={28} color="#FFF" />
         </View>
         <Text style={[stiller.baslik, { color: tema.metin }]}>Kayıt Ol</Text>
@@ -94,16 +120,17 @@ export default function KayitEkrani() {
           ))}
 
           <TouchableOpacity
-            style={[stiller.kayitButon, { backgroundColor: tema.basari }]}
+            style={[stiller.kayitButon, { backgroundColor: tema.anaRenk }]}
             onPress={kayitIslemi}
             activeOpacity={0.85}
           >
-            <Ionicons name="checkmark-circle" size={22} color="#FFF" />
+            <Ionicons name="checkmark-circle" size={20} color="#FFF" />
             <Text style={stiller.butonMetni}>Kaydı Tamamla</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -151,17 +178,21 @@ const stiller = StyleSheet.create({
   formAlani: {
     flex: 1,
     paddingHorizontal: 24,
+    alignItems: 'center',
+    width: '100%',
   },
   formKart: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 16,
+    padding: 32,
     borderWidth: 1,
-    elevation: 6,
+    width: '100%',
+    maxWidth: 420,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
-    gap: 10,
+    gap: 12,
   },
   hataKutu: {
     flexDirection: 'row',
@@ -195,19 +226,19 @@ const stiller = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
-    borderRadius: 14,
+    paddingVertical: 14,
+    borderRadius: 12,
     gap: 8,
-    marginTop: 6,
-    elevation: 4,
-    shadowColor: '#2ECC71',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    marginTop: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   butonMetni: {
     color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 15,
   },
 });

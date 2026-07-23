@@ -74,7 +74,8 @@ export default function AdminYerlesim() {
       <Tabs.Screen
         name="index"
         options={{
-          href: null,
+          title: 'Dashboard',
+          tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} />,
         }}
       />
       <Tabs.Screen

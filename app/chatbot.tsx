@@ -16,87 +16,15 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Aksesuar, Araba, ChatMesaj } from '../tipler';
 import { KullanimDurumTipi, useKullanimDurum } from '../durum/kullanimDurum';
-
-// Otomotiv uzmanı bilgi bankası
-const OTOMOTIV_BILGI_BANKASI = {
-  aracDetay: (marka: string, model: string) => {
-    const lowerMarka = marka.toLowerCase();
-    const lowerModel = model.toLowerCase();
-
-    if (lowerMarka.includes('bmw')) {
-      if (lowerModel.includes('3')) {
-        return {
-          motor: "2.0 litrelik TwinPower Turbo beslemeli motor, 184 beygir güç ve 300 Nm tork üretmektedir. 8 ileri Steptronic şanzımanla kombine edilmiştir.",
-          icMekan: "iDrive 8 işletim sistemine sahip kavisli ekran (Curved Display), premium Sensatec deri döşemeler ve sürüş odaklı kokpit mimarisiyle son derece teknolojik ve ergonomiktir.",
-          surus: "50:50 ağırlık dağılımı, arkadan itişli altyapı ve hassas tepkili direksiyon sistemiyle sınıfının sürüş dinamikleri referans modelidir.",
-          yakit: "Şehir dışı 5.2L, şehir içi 7.3L civarında makul bir yakıt tüketimine sahiptir. Bakım maliyetleri premium segment standartlarındadır.",
-          kronik: "Eski nesillerdeki zincir ve yağ kaçağı sorunları bu güncel LCI gövdede büyük ölçüde giderilmiştir; ancak elektronik sensör hassasiyetleri devam etmektedir."
-        };
-      }
-      return {
-        motor: "BMW TwinPower Turbo motor teknolojisi, yüksek devir çevirme karakteri ve ZF 8-ileri tam otomatik şanzıman uyumuyla üstün performans sunar.",
-        icMekan: "BMW Live Cockpit Professional, sezgisel iDrive arayüzü ve mükemmel malzeme kalitesiyle lüks ve teknolojiyi bir arada sunar.",
-        surus: "Dinamik Amortisör Kontrolü ve arkadan itiş odaklı xDrive sistemiyle hem sportif hem de konforlu bir sürüş karakteristiğine sahiptir.",
-        yakit: "Performansına oranla verimli tüketim sunar. Periyodik bakımları orijinal parça kullanımı gerektirir.",
-        kronik: "Yüksek kilometrelerde soğutma sistemi hortumları ve turbo bypass valfi aşınmaları görülebilir."
-      };
-    }
-    if (lowerMarka.includes('mercedes')) {
-      if (lowerModel.includes('c')) {
-        return {
-          motor: "1.5 litrelik turbo beslemeli motor + 48V hafif hibrit (EQ Boost) desteği ile 204 beygir güç ve 300 Nm tork üretir. 9G-Tronic şanzımana sahiptir.",
-          icMekan: "S-Serisi esintili dikey 11.9 inçlik MBUX multimedya ekranı, ambiyans aydınlatması ve ultra lüks malzeme kalitesiyle segmentinin en görkemli iç mekanına sahiptir.",
-          surus: "Konfor odaklı süspansiyon geometrisi, başarılı yalıtım ve stabil düz hat dengesiyle uzun yolculuklarda üst düzey konfor sunar.",
-          yakit: "Hafif hibrit sistemi sayesinde şehir içi dur-kalk trafiğinde yakıtı optimize eder; ortalama 6.5L/100km tüketim sunar.",
-          kronik: "MBUX yazılımında nadiren kilitlenmeler ve trim sesleri ilk üretim yıllarında kullanıcılar tarafından raporlanmıştır."
-        };
-      }
-      return {
-        motor: "EQ Boost teknolojisine sahip verimli motorlar ve pürüzsüz geçişli 9G-Tronic şanzıman kombinasyonu ile kesintisiz güç sağlar.",
-        icMekan: "Geniş dijital ekranlar, yüksek çözünürlüklü göstergeler, ahşap ve deri detayların uyumu ile konfor odaklı bir yaşam alanı sunar.",
-        surus: "Yol bozukluklarını sönümleyen süspansiyon yapısı ve yüksek hızlarda sağladığı kararlılıkla konfor öncelikli bir sürüş sunar.",
-        yakit: "Hafif hibrit mimarisi tüketimi dengeler. Yetkili servis bakımları bütçe planlaması gerektirir.",
-        kronik: "Karmaşık elektrik mimarisi nedeniyle akü voltaj dalgalanmalarına karşı hassastır."
-      };
-    }
-    if (lowerMarka.includes('audi')) {
-      if (lowerModel.includes('a4') || lowerModel.includes('q5')) {
-        return {
-          motor: "2.0 litrelik TDI veya TFSI motor seçenekleri, 190-204 beygir güç aralığı ve 7 ileri pürüzsüz S-Tronic çift kavramalı şanzımana sahiptir.",
-          icMekan: "Audi Virtual Cockpit, sade ve fonksiyonel konsol tasarımı, MMI touch kontrol ekranı ve kusursuz işçilik kalitesiyle dikkat çeker.",
-          surus: "Efsanevi quattro dört tekerlekten çekiş sistemi sayesinde her türlü yol koşulunda benzersiz bir yol tutuşu ve güvenlik sunar.",
-          yakit: "Özellikle TDI motor seçeneğiyle uzun yolda 4.8L gibi şaşırtıcı derecede düşük tüketim verilerine ulaşabilir.",
-          kronik: "S-Tronic şanzımanın mekatronik ünitesi ve yoğun trafikte ısınma eğilimi periyodik olarak kontrol edilmelidir."
-        };
-      }
-    }
-    if (lowerMarka.includes('tesla')) {
-      return {
-        motor: "Çift motorlu dört tekerlekten çekiş (AWD) altyapısı, anlık tork iletimi ve 0-100 km/s hızlanmasını 4 saniyenin altında tamamlayan elektrikli güç ünitesi.",
-        icMekan: "Tüm araç fonksiyonlarının yönetildiği 15 inçlik merkezi dokunmatik ekran, minimalist konsol ve cam tavan tasarımı.",
-        surus: "Gövde altına konumlandırılmış bataryalar sayesinde son derece düşük ağırlık merkezi ve go-kart hissi veren viraj kabiliyeti.",
-        yakit: "Yüksek enerji verimliliği. Evden şarjda inanılmaz ekonomik, Supercharger ağında hızlı şarj imkanı sunar.",
-        kronik: "İlk üretim serilerinde panel boşlukları (panel gaps) ve kabin içi rüzgar yalıtımı zafiyetleri gözlenmiştir."
-      };
-    }
-    
-    // Varsayılan genel otomotiv bilgisi
-    return {
-      motor: "Gelişmiş yakıt enjeksiyonu ve turboşarj teknolojisine sahip motor, optimum güç ve tork eğrisi ile akıcı hızlanma sunar.",
-      icMekan: "Ergonomik koltuk tasarımı, güncel bağlantı özellikleri barındıran bilgi-eğlence sistemi ve kullanışlı saklama alanları sunar.",
-      surus: "Dengeli ağırlık dağılımı, stabil viraj performansı ve günlük kullanıma uygun konfor-sportiflik dengesi mevcuttur.",
-      yakit: "Aerodinamik gövde yapısı sayesinde segment standartlarında yakıt ekonomisi ve sürdürülebilir bakım maliyetleri sunar.",
-      kronik: "Belirgin kronik bir sorunu olmamakla birlikte, düzenli sıvı ve filtre bakımları motor ömrü için kritiktir."
-    };
-  }
-};
+import { UstMenu } from '../bilesenler/UstMenu';
+import { AcikTema, KoyuTema } from '../sabitler/Tema';
 
 // Bot yanıt üretici - Kıdemli Otomotiv Uzmanı System Prompt
-const botYanitUret = (
+const botYanitUret = async (
   mesaj: string,
   arabalar: Araba[],
   aksesuarlar: Aksesuar[]
-): { metin: string; tip: ChatMesaj['tip']; karsilastirmaVerileri?: Araba[]; aramaVerileri?: (Araba | Aksesuar)[] } => {
+): Promise<{ metin: string; tip: ChatMesaj['tip']; karsilastirmaVerileri?: Araba[]; aramaVerileri?: (Araba | Aksesuar)[] }> => {
   const kucukMesaj = mesaj.toLowerCase().replace(/[ıİ]/g, (c) => c === 'ı' ? 'i' : 'i');
 
   // Karşılaştırma komutu
@@ -127,89 +55,53 @@ const botYanitUret = (
     );
 
     if (arac1 && arac2) {
-      const detay1 = OTOMOTIV_BILGI_BANKASI.aracDetay(arac1.marka, arac1.model);
-      const detay2 = OTOMOTIV_BILGI_BANKASI.aracDetay(arac2.marka, arac2.model);
-
       const karsilastirmaMetni = `📋 Kapsamlı Otomotiv Uzmanı Karşılaştırma Raporu:
 ──────────────────────────────
 🚗 ${arac1.marka} ${arac1.model} vs 🚙 ${arac2.marka} ${arac2.model}
 
 ⚙️ MOTOR VE PERFORMANS
-• ${arac1.marka} ${arac1.model}: ${detay1.motor}
-• ${arac2.marka} ${arac2.model}: ${detay2.motor}
+• ${arac1.marka}: ${arac1.motorHacmi || 'Belirtilmemiş'} / ${arac1.yakitTuru} / ${arac1.vites}
+• ${arac2.marka}: ${arac2.motorHacmi || 'Belirtilmemiş'} / ${arac2.yakitTuru} / ${arac2.vites}
 
-📱 İÇ MEKAN VE TEKNOLOJİ
-• ${arac1.marka} ${arac1.model}: ${detay1.icMekan}
-• ${arac2.marka} ${arac2.model}: ${detay2.icMekan}
-
-🏁 SÜRÜŞ DİNAMİKLERİ
-• ${arac1.marka} ${arac1.model}: ${detay1.surus}
-• ${arac2.marka} ${arac2.model}: ${detay2.surus}
-
-⛽ YAKIT VE BAKIM
-• ${arac1.marka} ${arac1.model}: ${detay1.yakit}
-• ${arac2.marka} ${arac2.model}: ${detay2.yakit}
-
-⚠️ KRONİK SORUNLAR / EDİTÖR NOTU
-• ${arac1.marka} ${arac1.model}: ${detay1.kronik}
-• ${arac2.marka} ${arac2.model}: ${detay2.kronik}
+💰 FİYAT VE MODEL YILI
+• ${arac1.marka}: ${arac1.yil} model - ${arac1.fiyat.toLocaleString('tr-TR')} ₺
+• ${arac2.marka}: ${arac2.yil} model - ${arac2.fiyat.toLocaleString('tr-TR')} ₺
 
 ──────────────────────────────
-Editör Kararı: Her iki araç da kendi segmentinde çok güçlü karakterlere sahip. Daha dinamik bir sürüş deneyimi arayanlar ${arac1.marka}'yı, konfor ve teknolojik kabini önceliklendirenler ${arac2.marka}'yı tercih edebilir.`;
+Editör Kararı: ${arac1.fiyat < arac2.fiyat ? arac1.marka : arac2.marka} fiyat/performans açısından daha avantajlı görünürken, ${arac1.yil > arac2.yil ? arac1.marka : arac2.marka} daha yeni model yılıyla dikkat çekiyor.`;
 
       return {
         metin: karsilastirmaMetni,
         tip: 'karsilastirma',
         karsilastirmaVerileri: [arac1, arac2]
       };
-    } else {
-      // Eğer veritabanında tam bulamadıysa ama premium markalarsa genel otomotiv uzmanı bilgisiyle kıyasla
-      return {
-        metin: `Aradığınız araçlardan birini veritabanımda bulamadım. Lütfen mevcut araç listemizden seçim yapın veya tam marka/model belirtin.\n\nMevcut markalar: Toyota, Honda, Ford, BMW, Mercedes-Benz, Audi, Tesla, Nissan, Hyundai, Chevrolet`,
-        tip: 'normal'
-      };
     }
   }
 
-  // Araç arama
-  const aramaKelimeleri = ['ara', 'bul', 'göster', 'listele', 'var mı', 'goster'];
-  const aramaYapiliyorMu = aramaKelimeleri.some(k => kucukMesaj.includes(k));
+  // Araç Arama
+  const bulunanAraclar = arabalar.filter((a: Araba) => 
+    kucukMesaj.includes(a.marka.toLowerCase()) || 
+    kucukMesaj.includes(a.model.toLowerCase())
+  ).slice(0, 3);
 
-  if (aramaYapiliyorMu) {
-    // Marka/model arama
-    const bulunanAraclar = arabalar.filter((a: Araba) =>
-      kucukMesaj.includes(a.marka.toLowerCase()) ||
-      kucukMesaj.includes(a.model.toLowerCase())
-    ).slice(0, 5);
-
-    if (bulunanAraclar.length > 0) {
-      return {
-        metin: `🚗 Kıdemli Otomotiv Editörü Analizi:\n\nAradığınız kriterlere uygun ${bulunanAraclar.length} adet araç listelenmiştir. Bu modeller yüksek ikinci el değeri, sürüş kararlılığı ve zengin donanımlarıyla bilinir. Detaylar için incele butonlarını kullanabilirsiniz.`,
-        tip: 'arama',
-        aramaVerileri: bulunanAraclar
-      };
-    }
-
-    // Aksesuar arama
-    const bulunanAksesuarlar = aksesuarlar.filter((a: Aksesuar) => {
-      const adKucuk = a.ad.toLowerCase();
-      const kategoriKucuk = (a.kategori || '').toLowerCase();
-      return kucukMesaj.split(' ').some((kelime: string) =>
-        kelime.length > 2 && (adKucuk.includes(kelime) || kategoriKucuk.includes(kelime))
-      );
-    }).slice(0, 5);
-
-    if (bulunanAksesuarlar.length > 0) {
-      return {
-        metin: `🔧 Aksesuar ve Donanım Önerileri:\n\nAracınızın konforunu ve değerini artıracak ${bulunanAksesuarlar.length} adet premium aksesuar bulunmuştur. Ürün detaylarından malzeme kalitesi ve montaj detaylarını inceleyebilirsiniz.`,
-        tip: 'arama',
-        aramaVerileri: bulunanAksesuarlar
-      };
-    }
-
+  if (bulunanAraclar.length > 0) {
     return {
-      metin: `Aramanızla tam eşleşen bir araç veya aksesuar kaydı bulunamadı. Lütfen "BMW ara", "lastik bul" veya "C-Class göster" şeklinde sorgulayın.`,
-      tip: 'normal'
+      metin: `🚗 Arama Sonuçları:\n\nAradığınız kriterlere uygun ${bulunanAraclar.length} adet araç bulundu.`,
+      tip: 'arama',
+      aramaVerileri: bulunanAraclar
+    };
+  }
+
+  // Aksesuar Arama
+  const bulunanAksesuarlar = aksesuarlar.filter((a: Aksesuar) => 
+    kucukMesaj.split(' ').some((kelime: string) => kelime.length > 2 && a.ad.toLowerCase().includes(kelime))
+  ).slice(0, 5);
+
+  if (bulunanAksesuarlar.length > 0) {
+    return {
+      metin: `🔧 Aksesuar Sonuçları:\n\nAradığınız kriterlere uygun ${bulunanAksesuarlar.length} adet aksesuar bulundu.`,
+      tip: 'arama',
+      aramaVerileri: bulunanAksesuarlar
     };
   }
 
@@ -218,7 +110,7 @@ Editör Kararı: Her iki araç da kendi segmentinde çok güçlü karakterlere s
     if (kucukMesaj.includes('ucuz')) {
       const enUcuz = [...arabalar].sort((a, b) => a.fiyat - b.fiyat).slice(0, 3);
       return {
-        metin: `💰 Fiyat/Performans Odaklı Araçlarımız:\n\nBütçe dostu, düşük bakım maliyetleri ve yüksek yakıt ekonomisi sunan en makul seçenekler listelenmiştir:`,
+        metin: `💰 En Uygun Fiyatlı Araçlar:\n\nBütçe dostu araçlarımız aşağıda listelenmiştir:`,
         tip: 'arama',
         aramaVerileri: enUcuz
       };
@@ -226,7 +118,7 @@ Editör Kararı: Her iki araç da kendi segmentinde çok güçlü karakterlere s
     if (kucukMesaj.includes('pahalı') || kucukMesaj.includes('pahali')) {
       const enPahali = [...arabalar].sort((a, b) => b.fiyat - a.fiyat).slice(0, 3);
       return {
-        metin: `💎 Premium ve Prestij Sınıfı Araçlarımız:\n\nÜst düzey teknoloji, maksimum konfor ve benzersiz sürüş dinamikleri sunan elit portföyümüz:`,
+        metin: `💎 Premium Araçlar:\n\nEn üst segment araçlarımız aşağıda listelenmiştir:`,
         tip: 'arama',
         aramaVerileri: enPahali
       };
@@ -235,9 +127,9 @@ Editör Kararı: Her iki araç da kendi segmentinde çok güçlü karakterlere s
 
   // İstatistik
   if (kucukMesaj.includes('kaç') || kucukMesaj.includes('istatistik') || kucukMesaj.includes('özet') || kucukMesaj.includes('bilgi')) {
-    const ortalamFiyat = Math.round(arabalar.reduce((t, a) => t + a.fiyat, 0) / arabalar.length);
+    const ortalamFiyat = Math.round(arabalar.reduce((t, a) => t + a.fiyat, 0) / (arabalar.length || 1));
     return {
-      metin: `📊 Portföy Analitik Raporu:\n\n🚗 Aktif İlan Havuzu: ${arabalar.length} araç\n🔧 Envanterdeki Aksesuar: ${aksesuarlar.length} adet\n💰 Ortalama Piyasa Değeri: ${ortalamFiyat.toLocaleString('tr-TR')} ₺\n🏷️ Minimum Fiyat Eşiği: ${Math.min(...arabalar.map(a => a.fiyat)).toLocaleString('tr-TR')} ₺\n💎 Maksimum Fiyat Eşiği: ${Math.max(...arabalar.map(a => a.fiyat)).toLocaleString('tr-TR')} ₺`,
+      metin: `📊 Portföy Analitiği:\n\n🚗 Aktif İlan: ${arabalar.length} araç\n🔧 Aksesuar: ${aksesuarlar.length} adet\n💰 Ortalama Fiyat: ${ortalamFiyat.toLocaleString('tr-TR')} ₺`,
       tip: 'normal'
     };
   }
@@ -245,14 +137,14 @@ Editör Kararı: Her iki araç da kendi segmentinde çok güçlü karakterlere s
   // Yardım / Selam
   if (kucukMesaj.includes('merhaba') || kucukMesaj.includes('selam') || kucukMesaj.includes('hey')) {
     return {
-      metin: `Merhaba! Ben AracApp Kıdemli Otomotiv Asistanınız. 🏎️\n\nSize segment analizleri, motor performans karşılaştırmaları, aksesuar önerileri ve fiyat analizlerinde rehberlik etmek için buradayım.\n\nNasıl yardımcı olabilirim? (Örn: "BMW 3 Series ile Mercedes-Benz C-Class karşılaştır", "en ucuz araçlar")`,
+      metin: `Merhaba! Ben AracApp Asistanınız. 🏎️\n\nSize araç karşılaştırmaları, aksesuar arama ve fiyat analizlerinde yardımcı olabilirim.\n\nÖrn: "BMW ile Mercedes karşılaştır" veya "en ucuz araçlar"`,
       tip: 'normal'
     };
   }
 
-  // Varsayılan yanıt
+  // Varsayılan
   return {
-    metin: `Anlayamadım. Ben bir Otomotiv Uzmanıyım, araçları karşılaştırabilir (örn: "BMW 3 Series ile Mercedes-Benz C-Class karşılaştır"), teknik detaylar verebilir veya arama yapabilirim. Lütfen sorunuzu bu doğrultuda güncelleyin.`,
+    metin: `Anlayamadım. Lütfen "BMW ara", "lastik bul" veya "BMW ile Audi karşılaştır" şeklinde sorgulayın.`,
     tip: 'normal'
   };
 };
@@ -263,6 +155,7 @@ export default function ChatbotEkrani() {
   const aksesuarlar = useKullanimDurum((state: KullanimDurumTipi) => state.aksesuarlar);
   const karanlikMod = useKullanimDurum((state: KullanimDurumTipi) => state.karanlikMod);
   const insets = useSafeAreaInsets();
+  const tema = karanlikMod ? KoyuTema : AcikTema;
 
   const [mesajlar, setMesajlar] = useState<ChatMesaj[]>([
     {
@@ -310,8 +203,8 @@ export default function ChatbotEkrani() {
     }, 50);
 
     // Bot yanıt gecikmesi
-    setTimeout(() => {
-      const yanit = botYanitUret(gonderilecekMesaj, arabalar, aksesuarlar);
+    setTimeout(async () => {
+      const yanit = await botYanitUret(gonderilecekMesaj, arabalar, aksesuarlar);
       const botMesaji: ChatMesaj = {
         id: `msg-${Date.now()}-bot`,
         gonderen: 'bot',
@@ -327,7 +220,7 @@ export default function ChatbotEkrani() {
       setTimeout(() => {
         listeRef.current?.scrollToEnd({ animated: true });
       }, 100);
-    }, 1200);
+    }, 500);
   };
 
   const hizliOneriButonlari = [
@@ -469,32 +362,23 @@ export default function ChatbotEkrani() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={[
-        stiller.anaKutu, 
-        karanlikMod && stiller.anaKutuKaranlik,
-        Platform.OS === 'web' && { maxWidth: 900, alignSelf: 'center', width: '100%', borderWidth: 1, borderColor: karanlikMod ? '#2A2A3E' : '#E4E7EB' }
-      ]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-    >
-      {/* Header */}
-      <View style={[stiller.baslikAlani, insets.top > 0 && { paddingTop: insets.top + 10 }, karanlikMod && stiller.baslikAlaniKaranlik]}>
-        <TouchableOpacity onPress={() => router.back()} style={stiller.geriButon}>
-          <Ionicons name="arrow-back" size={24} color={karanlikMod ? '#FFF' : '#333'} />
-        </TouchableOpacity>
-        <View style={stiller.baslikOrta}>
-          <View style={stiller.botIkon}>
-            <Ionicons name="car-sport" size={20} color="#FFF" />
-          </View>
-          <View>
-            <Text style={[stiller.baslikMetin, karanlikMod && stiller.metinKaranlik]}>AracApp Otomotiv Uzmanı</Text>
-            <Text style={[stiller.altBaslik, karanlikMod && stiller.metinSoluk]}>Yapay Zeka Editörü</Text>
-          </View>
-        </View>
-      </View>
+    <View style={[{ flex: 1, backgroundColor: tema.arkaplan }]}>
+      <UstMenu />
+      <TouchableOpacity style={[stiller.geriButon, { backgroundColor: tema.kartArkaplan }]} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color={tema.metin} />
+      </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={[
+          stiller.anaKutu, 
+          { backgroundColor: tema.arkaplan },
+          Platform.OS === 'web' && { maxWidth: 900, alignSelf: 'center', width: '100%', borderWidth: 1, borderColor: tema.kenarlik }
+        ]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 40}
+      >
+        {/* Header - Kaldırıldı, yerine UstMenu eklendi */}
 
-      {/* Mesaj Listesi */}
+        {/* Mesaj Listesi */}
       <FlatList
         ref={listeRef}
         data={mesajlar}
@@ -536,14 +420,13 @@ export default function ChatbotEkrani() {
         />
       </View>
 
-      {/* Mesaj Yazma Alanı */}
       <View style={[
         stiller.girdiAlani, 
-        karanlikMod && stiller.girdiAlaniKaranlik,
-        { paddingBottom: insets.bottom > 0 ? insets.bottom : 12 }
+        { backgroundColor: tema.kartArkaplan, borderTopColor: tema.kenarlik },
+        { paddingBottom: Platform.OS === 'android' ? insets.bottom + 15 : (insets.bottom > 0 ? insets.bottom : 12) }
       ]}>
         <TextInput
-          style={[stiller.mesajGirdi, karanlikMod && stiller.mesajGirdiKaranlik]}
+          style={[stiller.mesajGirdi, { backgroundColor: tema.yuzeyRenk, color: tema.metin }]}
           placeholder="Bir mesaj yazın..."
           placeholderTextColor={karanlikMod ? '#666' : '#999'}
           value={girdi}
@@ -560,16 +443,21 @@ export default function ChatbotEkrani() {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const stiller = StyleSheet.create({
   anaKutu: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
   },
-  anaKutuKaranlik: {
-    backgroundColor: '#0F0F1A',
+  geriButon: {
+    position: 'absolute',
+    top: 50,
+    left: 16,
+    zIndex: 10,
+    padding: 8,
+    borderRadius: 20,
   },
   baslikAlani: {
     flexDirection: 'row',
@@ -589,10 +477,7 @@ const stiller = StyleSheet.create({
     backgroundColor: '#1A1A2E',
     borderBottomColor: '#2A2A3E',
   },
-  geriButon: {
-    marginRight: 12,
-    padding: 4,
-  },
+
   baslikOrta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -822,13 +707,11 @@ const stiller = StyleSheet.create({
   // Mesaj yazma alanı
   girdiAlani: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
     padding: 12,
-    paddingBottom: 30,
-    backgroundColor: '#FFF',
     borderTopWidth: 1,
+    alignItems: 'flex-end',
     borderTopColor: '#E4E7EB',
-    gap: 10,
+    backgroundColor: '#FFF',
     ...(Platform.OS === 'web' ? { maxWidth: 900, alignSelf: 'center', width: '100%' } : {})
   },
   girdiAlaniKaranlik: {
@@ -837,12 +720,14 @@ const stiller = StyleSheet.create({
   },
   mesajGirdi: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
-    borderRadius: 24,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
     fontSize: 15,
     maxHeight: 100,
+    marginRight: 10,
+    backgroundColor: '#F5F7FA',
     color: '#333',
   },
   mesajGirdiKaranlik: {
@@ -856,6 +741,7 @@ const stiller = StyleSheet.create({
     backgroundColor: '#1B4DFF',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 2,
   },
   gonderButonPasif: {
     backgroundColor: '#A0B4FF',
@@ -866,6 +752,7 @@ const stiller = StyleSheet.create({
   metinSoluk: {
     color: '#8B8FA3',
   },
+  // İnceleme yonlendirme butonlari
   incelemeButonlarGrup: {
     marginTop: 12,
     backgroundColor: 'rgba(27, 77, 255, 0.05)',

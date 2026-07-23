@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, FlatList, Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,11 +13,32 @@ export default function StokYonetim() {
   const stokGuncelle = useKullanimDurum((state: KullanimDurumTipi) => state.stokGuncelle);
   const tema = karanlikMod ? KoyuTema : AcikTema;
   const insets = useSafeAreaInsets();
-  const [aramaKelimesi, setAramaKelimesi] = useState('');
 
-  const filtreliAksesuarlar = aksesuarlar.filter((a: Aksesuar) =>
-    a.ad.toLowerCase().includes(aramaKelimesi.toLowerCase())
-  );
+  const [aramaKelimesi, setAramaKelimesi] = useState('');
+  const [seciliFiltre, setSeciliFiltre] = useState<'Tümü' | 'Stokta' | 'Azalan' | 'Tükenen'>('Tümü');
+
+  const filtreliAksesuarlar = useMemo(() => {
+    let filtrelenmis = aksesuarlar;
+    
+    // Arama
+    if (aramaKelimesi) {
+      filtrelenmis = filtrelenmis.filter(a => 
+        a.ad.toLowerCase().includes(aramaKelimesi.toLowerCase()) ||
+        a.kategori.toLowerCase().includes(aramaKelimesi.toLowerCase())
+      );
+    }
+    
+    // Stok Filtresi
+    if (seciliFiltre === 'Stokta') {
+      filtrelenmis = filtrelenmis.filter(a => a.stok > 10);
+    } else if (seciliFiltre === 'Azalan') {
+      filtrelenmis = filtrelenmis.filter(a => a.stok > 0 && a.stok <= 10);
+    } else if (seciliFiltre === 'Tükenen') {
+      filtrelenmis = filtrelenmis.filter(a => a.stok <= 0);
+    }
+
+    return filtrelenmis;
+  }, [aksesuarlar, aramaKelimesi, seciliFiltre]);
 
   const stokDurumRenk = (stok: number) => {
     if (stok <= 0) return tema.uyariKirmizi;
@@ -129,28 +150,43 @@ export default function StokYonetim() {
   const toplamUrun = aksesuarlar.length;
   const tukenenUrun = aksesuarlar.filter(a => a.stok <= 0).length;
   const azalanUrun = aksesuarlar.filter(a => a.stok > 0 && a.stok <= 10).length;
-  const toplamStok = aksesuarlar.reduce((t, a) => t + a.stok, 0);
+  const stoktaUrun = aksesuarlar.filter(a => a.stok > 10).length;
 
   return (
     <View style={[stiller.kapsayici, { backgroundColor: tema.arkaplan }]}>
-      {/* İstatistikler */}
+      {/* İstatistikler (Filtreler) */}
       <View style={[stiller.istatistikAlani, { backgroundColor: tema.kartArkaplan }]}>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.ikincilRenk + '12' }]}>
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.ikincilRenk + (seciliFiltre === 'Tümü' ? '30' : '12'), borderColor: seciliFiltre === 'Tümü' ? tema.ikincilRenk : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre('Tümü')}
+        >
           <Text style={[stiller.istatistikSayi, { color: tema.ikincilRenk }]}>{toplamUrun}</Text>
-          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Ürün</Text>
-        </View>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.basari + '12' }]}>
-          <Text style={[stiller.istatistikSayi, { color: tema.basari }]}>{toplamStok}</Text>
-          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Toplam Stok</Text>
-        </View>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.vurguRenk + '12' }]}>
+          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Tümü</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.basari + (seciliFiltre === 'Stokta' ? '30' : '12'), borderColor: seciliFiltre === 'Stokta' ? tema.basari : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre('Stokta')}
+        >
+          <Text style={[stiller.istatistikSayi, { color: tema.basari }]}>{stoktaUrun}</Text>
+          <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Stokta</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.vurguRenk + (seciliFiltre === 'Azalan' ? '30' : '12'), borderColor: seciliFiltre === 'Azalan' ? tema.vurguRenk : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre('Azalan')}
+        >
           <Text style={[stiller.istatistikSayi, { color: tema.vurguRenk }]}>{azalanUrun}</Text>
           <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Azalan</Text>
-        </View>
-        <View style={[stiller.istatistikKart, { backgroundColor: tema.uyariKirmizi + '12' }]}>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[stiller.istatistikKart, { backgroundColor: tema.uyariKirmizi + (seciliFiltre === 'Tükenen' ? '30' : '12'), borderColor: seciliFiltre === 'Tükenen' ? tema.uyariKirmizi : 'transparent', borderWidth: 1 }]}
+          onPress={() => setSeciliFiltre('Tükenen')}
+        >
           <Text style={[stiller.istatistikSayi, { color: tema.uyariKirmizi }]}>{tukenenUrun}</Text>
           <Text style={[stiller.istatistikEtiket, { color: tema.metinAcik }]}>Tükenen</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Arama */}
@@ -189,11 +225,13 @@ const stiller = StyleSheet.create({
   },
   istatistikAlani: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     padding: 12,
     gap: 8,
   },
   istatistikKart: {
     flex: 1,
+    minWidth: '45%',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 12,
@@ -305,6 +343,7 @@ const stiller = StyleSheet.create({
   },
   stokKontrol: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

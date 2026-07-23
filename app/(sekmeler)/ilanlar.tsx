@@ -15,11 +15,21 @@ export default function IlanlarEkrani() {
 
   const [aramaKelimesi, setAramaKelimesi] = useState('');
   const [seciliArabaIdleri, setSeciliArabaIdleri] = useState<string[]>([]);
+  const [siralama, setSiralama] = useState<'varsayilan' | 'guncel' | 'ucuz'>('varsayilan');
 
-  const filtreliArabalar = arabalar.filter((araba: Araba) =>
-    araba.marka.toLowerCase().includes(aramaKelimesi.toLowerCase()) ||
-    araba.model.toLowerCase().includes(aramaKelimesi.toLowerCase())
-  );
+  const filtreliArabalar = arabalar
+    .filter((araba: Araba) =>
+      araba.marka.toLowerCase().includes(aramaKelimesi.toLowerCase()) ||
+      araba.model.toLowerCase().includes(aramaKelimesi.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (siralama === 'guncel') {
+        return new Date(b.ilanTarihi || 0).getTime() - new Date(a.ilanTarihi || 0).getTime();
+      } else if (siralama === 'ucuz') {
+        return a.fiyat - b.fiyat;
+      }
+      return 0;
+    });
 
   const arabaSecToggle = (id: string) => {
     setSeciliArabaIdleri(prev =>
@@ -88,10 +98,9 @@ export default function IlanlarEkrani() {
 
   return (
     <View style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}>
-      {/* Arama */}
       <View style={stiller.aramaKutu}>
-        <View style={[stiller.aramaIcerik, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
-          <Ionicons name="search" size={18} color={tema.metinAcik} />
+        <View style={[stiller.aramaIcerik, { backgroundColor: tema.kartArkaplan, borderColor: tema.anaRenk }]}>
+          <Ionicons name="search" size={18} color={tema.anaRenk} />
           <TextInput
             style={[stiller.aramaGirdi, { color: tema.metin }]}
             placeholder="Marka veya model ara..."
@@ -104,6 +113,25 @@ export default function IlanlarEkrani() {
               <Ionicons name="close-circle" size={18} color={tema.metinAcik} />
             </TouchableOpacity>
           )}
+        </View>
+
+        {/* Filtreler */}
+        <View style={stiller.filtreKutu}>
+          <TouchableOpacity 
+            style={[stiller.filtreButon, siralama === 'guncel' ? { backgroundColor: tema.anaRenk, borderColor: tema.anaRenk } : { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}
+            onPress={() => setSiralama(siralama === 'guncel' ? 'varsayilan' : 'guncel')}
+          >
+            <Ionicons name="time-outline" size={16} color={siralama === 'guncel' ? '#FFF' : tema.metinAcik} />
+            <Text style={[stiller.filtreMetin, { color: siralama === 'guncel' ? '#FFF' : tema.metinAcik }]}>En Güncel</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[stiller.filtreButon, siralama === 'ucuz' ? { backgroundColor: tema.anaRenk, borderColor: tema.anaRenk } : { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}
+            onPress={() => setSiralama(siralama === 'ucuz' ? 'varsayilan' : 'ucuz')}
+          >
+            <Ionicons name="pricetag-outline" size={16} color={siralama === 'ucuz' ? '#FFF' : tema.metinAcik} />
+            <Text style={[stiller.filtreMetin, { color: siralama === 'ucuz' ? '#FFF' : tema.metinAcik }]}>En Ucuz</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -136,24 +164,48 @@ const stiller = StyleSheet.create({
     flex: 1,
   },
   aramaKutu: {
-    padding: 12,
-    paddingBottom: 4,
+    padding: 16,
+    paddingBottom: 8,
+    gap: 12,
   },
   aramaIcerik: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    gap: 10,
     maxWidth: 600,
     alignSelf: 'center',
     width: '100%',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   aramaGirdi: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
+  },
+  filtreKutu: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  filtreButon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+  },
+  filtreMetin: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   listeAlani: {
     padding: 10,

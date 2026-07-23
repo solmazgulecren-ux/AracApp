@@ -1,7 +1,7 @@
-import { Kullanici } from "@/tipler/Kullanici";
+import { Kullanici } from "../../tipler";
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { FlatList, Platform, StyleSheet, Text, View } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { FlatList, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KullanimDurumTipi, useKullanimDurum } from '../../durum/kullanimDurum';
@@ -15,6 +15,42 @@ export default function KullanicilarYonetim() {
   const siparisler = useKullanimDurum((state: KullanimDurumTipi) => state.siparisler);
   const tema = karanlikMod ? KoyuTema : AcikTema;
   const insets = useSafeAreaInsets();
+  const [aramaMetni, setAramaMetni] = useState('');
+
+  const filtrelenmisKullanicilar = useMemo(() => {
+    // Sadece ilan vermiş veya sipariş vermiş (reaksiyon göstermiş) aktif kullanıcılar
+    const aktifKullanicilar = kullanicilar.filter(k => {
+      const ilanVarMi = arabalar.some(a => a.saticiId === k.id) || aksesuarlar.some(a => a.saticiId === k.id);
+      const siparisVarMi = siparisler.some(s => s.kullaniciId === k.id);
+      return ilanVarMi || siparisVarMi;
+    });
+
+    // En son aktivite tarihine göre yeniden eskiye doğru sıralama
+    const sirali = aktifKullanicilar.sort((a, b) => {
+      const aArabalar = arabalar.filter(araba => araba.saticiId === a.id && araba.ilanTarihi);
+      const bArabalar = arabalar.filter(araba => araba.saticiId === b.id && araba.ilanTarihi);
+      
+      const aTarih = aArabalar.length > 0 
+        ? aArabalar.reduce((max, araba) => (araba.ilanTarihi! > max ? araba.ilanTarihi! : max), aArabalar[0].ilanTarihi!) 
+        : (a.kayitTarihi || '');
+        
+      const bTarih = bArabalar.length > 0 
+        ? bArabalar.reduce((max, araba) => (araba.ilanTarihi! > max ? araba.ilanTarihi! : max), bArabalar[0].ilanTarihi!) 
+        : (b.kayitTarihi || '');
+
+      return bTarih.localeCompare(aTarih);
+    });
+
+    if (aramaMetni) {
+      return sirali.filter(k => 
+        k.ad.toLowerCase().includes(aramaMetni.toLowerCase()) || 
+        k.soyad.toLowerCase().includes(aramaMetni.toLowerCase()) || 
+        k.eposta.toLowerCase().includes(aramaMetni.toLowerCase())
+      );
+    }
+    
+    return sirali;
+  }, [kullanicilar, arabalar, aksesuarlar, siparisler, aramaMetni]);
 
   const getIlanSayisi = (kullaniciId: string) => {
     const arabaSayisi = arabalar.filter(a => a.saticiId === kullaniciId).length;
@@ -104,8 +140,23 @@ export default function KullanicilarYonetim() {
 
   return (
     <View style={[stiller.kapsayici, { backgroundColor: tema.arkaplan }]}>
+      {/* Arama Çubuğu */}
+      <View style={[stiller.aramaKutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }, Platform.OS === 'web' && { maxWidth: 800, alignSelf: 'center', width: '100%', marginTop: 16 }]}>
+        <Ionicons name="search" size={20} color={tema.metinAcik} style={{ marginRight: 10 }} />
+        <TextInput
+          style={[stiller.aramaGirdi, { color: tema.metin, ...(Platform.OS === 'web' && { outlineStyle: 'none' as any }) }]}
+          placeholder="Kullanıcı Ara (Ad, E-posta)..."
+          placeholderTextColor={tema.metinAcik}
+          value={aramaMetni}
+          onChangeText={setAramaMetni}
+        />
+        {aramaMetni.length > 0 && (
+          <Ionicons name="close-circle" size={20} color={tema.metinAcik} onPress={() => setAramaMetni('')} />
+        )}
+      </View>
+
       <FlatList
-        data={kullanicilar}
+        data={filtrelenmisKullanicilar}
         keyExtractor={item => item.id}
         renderItem={kullaniciKartRender}
         contentContainerStyle={[stiller.liste, { paddingBottom: insets.bottom + 20 }]}
@@ -117,6 +168,20 @@ export default function KullanicilarYonetim() {
 const stiller = StyleSheet.create({
   kapsayici: {
     flex: 1,
+  },
+  aramaKutu: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  aramaGirdi: {
+    flex: 1,
+    fontSize: 15,
   },
   liste: {
     padding: 16,

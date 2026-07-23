@@ -1,15 +1,19 @@
-import { Kullanici } from "@/tipler/Kullanici";
+import { Kullanici } from "../../tipler";
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Platform, useWindowDimensions } from 'react-native';
 import { toastGosterGlobal } from '../../bilesenler/ToastBildirim';
 import { KullanimDurumTipi, useKullanimDurum } from '../../durum/kullanimDurum';
 import { Araba, Favori } from '../../tipler';
+import { UstMenu } from '../../bilesenler/UstMenu';
+import { AcikTema, KoyuTema } from '../../sabitler/Tema';
 
 export default function ArabaDetayEkrani() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const genisEkran = Platform.OS === 'web' && width > 800;
 
   const arabalar = useKullanimDurum((state: KullanimDurumTipi) => state.arabalar);
   const kullanicilar = useKullanimDurum((state: KullanimDurumTipi) => state.kullanicilar);
@@ -17,6 +21,8 @@ export default function ArabaDetayEkrani() {
   const favoriDegistir = useKullanimDurum((state: KullanimDurumTipi) => state.favoriDegistir);
   const aktifKullanici = useKullanimDurum((state: KullanimDurumTipi) => state.aktifKullanici);
   const karanlikMod = useKullanimDurum((state: KullanimDurumTipi) => state.karanlikMod);
+  const tema = karanlikMod ? KoyuTema : AcikTema;
+  
   const arabaSil = useKullanimDurum((state: KullanimDurumTipi) => state.arabaSil);
   const karsilastirmayaEkle = useKullanimDurum((state: KullanimDurumTipi) => state.karsilastirmayaEkle);
   const kullaniciKarsilastirmaListesi = useKullanimDurum((state: KullanimDurumTipi) => state.kullaniciKarsilastirmaListesi);
@@ -26,8 +32,9 @@ export default function ArabaDetayEkrani() {
 
   if (!araba) {
     return (
-      <View style={[stiller.anaKutu, karanlikMod && stiller.anaKutuKaranlik]}>
-        <Text style={[stiller.hataMetni, karanlikMod && stiller.metinKaranlik]}>Araç bulunamadı.</Text>
+      <View style={[stiller.anaKutu, { backgroundColor: tema.arkaplan }]}>
+        <UstMenu />
+        <Text style={[stiller.hataMetni, { color: tema.metin }]}>Araç bulunamadı.</Text>
       </View>
     );
   }
@@ -35,7 +42,6 @@ export default function ArabaDetayEkrani() {
   const satici = kullanicilar.find((k: Kullanici) => k.id === araba.saticiId);
   const favoriMi = favoriler.some((f: Favori) => f.arabaId === id && f.kullaniciId === aktifKullanici?.id);
   
-  // İlan sahibi kontrolü - sadece ilan sahibi sil/düzenle butonlarını görebilir
   const ilanSahibiMi = aktifKullanici?.id === araba.saticiId;
   const karsilastirmadaMi = karsilastirmaListesi.includes(araba.id);
 
@@ -76,126 +82,177 @@ export default function ArabaDetayEkrani() {
   };
 
   return (
-    <ScrollView style={[stiller.anaKutu, karanlikMod && stiller.anaKutuKaranlik]}>
-      <View style={stiller.resimKutu}>
-        <Image source={{ uri: araba.resimler[0] }} style={stiller.resim} />
-        <TouchableOpacity
-          style={stiller.geriButon}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={stiller.favoriButon}
-          onPress={() => favoriDegistir(araba.id)}
-        >
-          <Ionicons name={favoriMi ? "heart" : "heart-outline"} size={28} color={favoriMi ? "#FF3B30" : "#FFF"} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={stiller.icerik}>
-        <View style={stiller.baslikSatir}>
-          <Text style={[stiller.baslik, karanlikMod && stiller.metinKaranlik]}>
-            {araba.marka} {araba.model}
-          </Text>
-          <Text style={stiller.fiyat}>{araba.fiyat.toLocaleString('tr-TR')} ₺</Text>
-        </View>
-
-        {/* Aksyon butonları */}
-        <View style={stiller.aksyonAlani}>
-          <TouchableOpacity
-            style={[stiller.karsilastirButon, karsilastirmadaMi && stiller.karsilastirButonAktif]}
-            onPress={karsilastirIslemi}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name={karsilastirmadaMi ? 'checkmark-circle' : 'git-compare-outline'}
-              size={18}
-              color={karsilastirmadaMi ? '#FFF' : '#1B4DFF'}
-            />
-            <Text style={[stiller.karsilastirMetin, karsilastirmadaMi && { color: '#FFF' }]}>
-              {karsilastirmadaMi ? 'Eklendi' : 'Karşılaştır'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={[stiller.ozellikKutu, karanlikMod && stiller.kutuKaranlik]}>
-          <Text style={[stiller.ozellikMetin, karanlikMod && stiller.metinKaranlik]}>Yıl: {araba.yil}</Text>
-          <Text style={[stiller.ozellikMetin, karanlikMod && stiller.metinKaranlik]}>Kilometre: {araba.kilometre.toLocaleString('tr-TR')} km</Text>
-          <Text style={[stiller.ozellikMetin, karanlikMod && stiller.metinKaranlik]}>Vites: {araba.vites}</Text>
-          <Text style={[stiller.ozellikMetin, karanlikMod && stiller.metinKaranlik]}>Yakıt: {araba.yakitTuru}</Text>
-        </View>
-
-        <View style={[stiller.kutu, karanlikMod && stiller.kutuKaranlik]}>
-          <Text style={[stiller.kutuBaslik, karanlikMod && stiller.metinKaranlik]}>Açıklama</Text>
-          <Text style={[stiller.aciklamaMetin, karanlikMod && stiller.metinSoluk]}>{araba.aciklama}</Text>
-        </View>
-
-        <View style={[stiller.kutu, karanlikMod && stiller.kutuKaranlik]}>
-          <Text style={[stiller.kutuBaslik, karanlikMod && stiller.metinKaranlik]}>Donanımlar</Text>
-          {araba.ozellikler.map((ozellik: string, index: number) => (
-            <Text key={index} style={[stiller.ozellikMadde, karanlikMod && stiller.metinSoluk]}>
-              • {ozellik}
-            </Text>
-          ))}
-        </View>
-
-        {satici && (
-          <View style={[stiller.saticiKutu, karanlikMod && stiller.kutuKaranlik]}>
-            <Text style={[stiller.kutuBaslik, karanlikMod && stiller.metinKaranlik]}>Satıcı Bilgileri</Text>
-            <Text style={[stiller.saticiMetin, karanlikMod && stiller.metinKaranlik]}>{satici.ad} {satici.soyad}</Text>
-            <Text style={[stiller.saticiMetin, karanlikMod && stiller.metinKaranlik]}>{satici.telefon}</Text>
-            <Text style={[stiller.saticiMetin, karanlikMod && stiller.metinSoluk]}>{satici.adres}</Text>
-            <View style={stiller.puanSatir}>
-              <Ionicons name="star" size={16} color="#F59E0B" />
-              <Text style={[stiller.saticiMetin, karanlikMod && stiller.metinKaranlik]}>
-                {satici.puan} ({satici.degerlendirmeSayisi} değerlendirme)
-              </Text>
+    <View style={{ flex: 1, backgroundColor: tema.arkaplan }}>
+      <UstMenu />
+      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingBottom: 40 }}>
+        <View style={[stiller.icerikKapsayici, genisEkran && stiller.icerikKapsayiciGenis]}>
+          
+          {/* SOL TARAF: Görsel */}
+          <View style={[stiller.gorselAlan, genisEkran && stiller.gorselAlanGenis]}>
+            <View style={stiller.resimKutu}>
+              <Image source={{ uri: araba.resimler[0] }} style={stiller.resim} resizeMode="cover" />
+              <TouchableOpacity
+                style={stiller.geriButon}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="arrow-back" size={24} color="#FFF" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={stiller.favoriButon}
+                onPress={() => favoriDegistir(araba.id)}
+              >
+                <Ionicons name={favoriMi ? "heart" : "heart-outline"} size={28} color={favoriMi ? tema.uyariKirmizi : "#FFF"} />
+              </TouchableOpacity>
             </View>
           </View>
-        )}
 
-        {/* İlan Sahibi Butonları - Sadece ilan sahibi görür */}
-        {ilanSahibiMi && (
-          <View style={stiller.sahibiAlani}>
-            <View style={[stiller.sahibiBilgi, karanlikMod && { backgroundColor: '#1A2A4A' }]}>
-              <Ionicons name="shield-checkmark" size={18} color="#1B4DFF" />
-              <Text style={[stiller.sahibiBilgiMetni, karanlikMod && stiller.metinKaranlik]}>
-                Bu ilan size aittir
+          {/* SAĞ TARAF: Bilgiler */}
+          <View style={[stiller.bilgiAlan, genisEkran && stiller.bilgiAlanGenis]}>
+            <View style={stiller.baslikSatir}>
+              <Text style={[stiller.baslik, { color: tema.metin }]}>
+                {araba.marka} {araba.model}
               </Text>
+              <Text style={[stiller.fiyat, { color: tema.anaRenk }]}>{araba.fiyat.toLocaleString('tr-TR')} ₺</Text>
             </View>
 
-            <TouchableOpacity
-              style={stiller.silButon}
-              onPress={silmeIslemi}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="trash-outline" size={20} color="#FFF" />
-              <Text style={stiller.silButonMetni}>İlanı Sil</Text>
-            </TouchableOpacity>
+            {/* Aksyon butonları */}
+            <View style={stiller.aksyonAlani}>
+              <TouchableOpacity
+                style={[stiller.karsilastirButon, { borderColor: tema.anaRenk }, karsilastirmadaMi && { backgroundColor: tema.anaRenk }]}
+                onPress={karsilastirIslemi}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name={karsilastirmadaMi ? 'checkmark-circle' : 'git-compare-outline'}
+                  size={18}
+                  color={karsilastirmadaMi ? '#FFF' : tema.anaRenk}
+                />
+                <Text style={[stiller.karsilastirMetin, { color: tema.anaRenk }, karsilastirmadaMi && { color: '#FFF' }]}>
+                  {karsilastirmadaMi ? 'Eklendi' : 'Karşılaştır'}
+                </Text>
+              </TouchableOpacity>
+
+              {!ilanSahibiMi && (
+                <TouchableOpacity
+                  style={[stiller.mesajButon, { backgroundColor: tema.anaRenk }]}
+                  onPress={() => router.push(`/mesaj/${araba.id}` as any)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="chatbubbles-outline" size={18} color="#FFF" />
+                  <Text style={stiller.mesajButonMetin}>Satıcıya Mesaj Gönder</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={[stiller.ozellikKutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+              <Text style={[stiller.ozellikMetin, { color: tema.metin }]}>Yıl: <Text style={{ color: tema.metinAcik }}>{araba.yil}</Text></Text>
+              <Text style={[stiller.ozellikMetin, { color: tema.metin }]}>Kilometre: <Text style={{ color: tema.metinAcik }}>{araba.kilometre.toLocaleString('tr-TR')} km</Text></Text>
+              <Text style={[stiller.ozellikMetin, { color: tema.metin }]}>Vites: <Text style={{ color: tema.metinAcik }}>{araba.vites}</Text></Text>
+              <Text style={[stiller.ozellikMetin, { color: tema.metin }]}>Yakıt: <Text style={{ color: tema.metinAcik }}>{araba.yakitTuru}</Text></Text>
+            </View>
+
+            <View style={[stiller.kutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+              <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Açıklama</Text>
+              <Text style={[stiller.aciklamaMetin, { color: tema.metinAcik }]}>{araba.aciklama}</Text>
+            </View>
+
+            <View style={[stiller.kutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+              <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Donanımlar</Text>
+              {araba.ozellikler.map((ozellik: string, index: number) => (
+                <Text key={index} style={[stiller.ozellikMadde, { color: tema.metinAcik }]}>
+                  • {ozellik}
+                </Text>
+              ))}
+            </View>
+
+            {satici && (
+              <View style={[stiller.saticiKutu, { backgroundColor: tema.vurguRenk + '10', borderColor: tema.vurguRenk + '30' }]}>
+                <Text style={[stiller.kutuBaslik, { color: tema.metin }]}>Satıcı Bilgileri</Text>
+                <Text style={[stiller.saticiMetin, { color: tema.metin }]}>{satici.ad} {satici.soyad}</Text>
+                <Text style={[stiller.saticiMetin, { color: tema.metin }]}>{satici.telefon}</Text>
+                <Text style={[stiller.saticiMetin, { color: tema.metinAcik }]}>{satici.adres}</Text>
+                <View style={stiller.puanSatir}>
+                  <Ionicons name="star" size={16} color="#F59E0B" />
+                  <Text style={[stiller.saticiMetin, { color: tema.metin }]}>
+                    {satici.puan} ({satici.degerlendirmeSayisi} değerlendirme)
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* İlan Sahibi Butonları */}
+            {ilanSahibiMi && (
+              <View style={stiller.sahibiAlani}>
+                <View style={[stiller.sahibiBilgi, { backgroundColor: tema.anaRenk + '15' }]}>
+                  <Ionicons name="shield-checkmark" size={18} color={tema.anaRenk} />
+                  <Text style={[stiller.sahibiBilgiMetni, { color: tema.anaRenk }]}>
+                    Bu ilan size aittir
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <TouchableOpacity
+                    style={[stiller.guncelleButon, { flex: 1, backgroundColor: '#10B981' }]}
+                    onPress={() => router.push(`/ilan-guncelle/${araba.id}` as any)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="create-outline" size={20} color="#FFF" />
+                    <Text style={stiller.silButonMetni}>Güncelle</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[stiller.silButon, { flex: 1, backgroundColor: tema.uyariKirmizi }]}
+                    onPress={silmeIslemi}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#FFF" />
+                    <Text style={stiller.silButonMetni}>Sil</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
           </View>
-        )}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const stiller = StyleSheet.create({
   anaKutu: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  anaKutuKaranlik: {
-    backgroundColor: '#121212',
   },
   hataMetni: {
     fontSize: 18,
     textAlign: 'center',
     marginTop: 50,
   },
+  icerikKapsayici: {
+    width: '100%',
+    flexDirection: 'column',
+  },
+  icerikKapsayiciGenis: {
+    flexDirection: 'row',
+    maxWidth: 1200,
+    marginTop: 20,
+    alignItems: 'flex-start',
+    gap: 24,
+    paddingHorizontal: 20,
+  },
+  gorselAlan: {
+    width: '100%',
+  },
+  gorselAlanGenis: {
+    flex: 1,
+    position: 'sticky' as any,
+    top: 20,
+  },
   resimKutu: {
     position: 'relative',
-    height: 300,
+    height: 350,
+    width: '100%',
+    ...(Platform.OS === 'web' && { borderRadius: 16, overflow: 'hidden' }),
   },
   resim: {
     width: '100%',
@@ -203,7 +260,7 @@ const stiller = StyleSheet.create({
   },
   geriButon: {
     position: 'absolute',
-    top: 40,
+    top: 20,
     left: 20,
     backgroundColor: 'rgba(0,0,0,0.5)',
     padding: 10,
@@ -217,8 +274,13 @@ const stiller = StyleSheet.create({
     padding: 10,
     borderRadius: 25,
   },
-  icerik: {
+  bilgiAlan: {
+    width: '100%',
     padding: 15,
+  },
+  bilgiAlanGenis: {
+    flex: 1,
+    padding: 0,
   },
   baslikSatir: {
     flexDirection: 'row',
@@ -227,15 +289,13 @@ const stiller = StyleSheet.create({
     marginBottom: 12,
   },
   baslik: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     flex: 1,
-    color: '#333',
   },
   fiyat: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#007AFF',
   },
   aksyonAlani: {
     flexDirection: 'row',
@@ -249,68 +309,70 @@ const stiller = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#1B4DFF',
-    gap: 6,
-  },
-  karsilastirButonAktif: {
-    backgroundColor: '#1B4DFF',
-    borderColor: '#1B4DFF',
+    gap: 8,
   },
   karsilastirMetin: {
-    color: '#1B4DFF',
+    fontSize: 15,
     fontWeight: 'bold',
-    fontSize: 14,
+  },
+  mesajButon: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 8,
+  },
+  mesajButonMetin: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#FFF',
   },
   ozellikKutu: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    backgroundColor: '#FFF',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
+    borderWidth: 1,
   },
   ozellikMetin: {
     width: '48%',
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '600',
     marginBottom: 10,
-    color: '#333',
   },
   kutu: {
-    backgroundColor: '#FFF',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
-  },
-  kutuKaranlik: {
-    backgroundColor: '#1E1E1E',
+    borderWidth: 1,
   },
   kutuBaslik: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
   },
   aciklamaMetin: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 24,
-    color: '#555',
   },
   ozellikMadde: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: '#555',
+    fontSize: 15,
+    marginBottom: 6,
   },
   saticiKutu: {
-    backgroundColor: '#E8F2FF',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
+    borderWidth: 1,
   },
   saticiMetin: {
-    fontSize: 16,
+    fontSize: 15,
     marginBottom: 5,
-    color: '#333',
   },
   puanSatir: {
     flexDirection: 'row',
@@ -327,38 +389,34 @@ const stiller = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#E8EEFF',
     padding: 12,
     borderRadius: 10,
   },
   sahibiBilgiMetni: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1B4DFF',
   },
   silButon: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF3B30',
     paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
-    elevation: 3,
-    shadowColor: '#FF3B30',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    elevation: 2,
+  },
+  guncelleButon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+    elevation: 2,
   },
   silButonMetni: {
     color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  metinKaranlik: {
-    color: '#FFF',
-  },
-  metinSoluk: {
-    color: '#AAA',
   },
 });

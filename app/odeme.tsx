@@ -38,11 +38,11 @@ export default function OdemeEkrani() {
     }
 
     const siparisId = siparisOlustur({
-      ad: ad.trim(),
-      soyad: soyad.trim(),
+      adSoyad: `${ad.trim()} ${soyad.trim()}`,
       telefon: telefon.trim(),
       adres: adres.trim(),
-      eposta: eposta.trim(),
+      il: 'İstanbul', // Varsayılan veya eklenebilir
+      ilce: 'Merkez',
     });
 
     if (siparisId) {

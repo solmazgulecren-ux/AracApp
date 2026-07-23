@@ -1,0 +1,119 @@
+{
+  "model_resimleri": {
+    "Toyota_Camry": [
+      "https://imagedelivery.net/hRb1AlBpyjz4FcNKWA7sOQ/c3c9d49d-bd28-4ce4-9687-589efefbc000/950x550",
+      "https://www.arabalar.com.tr/wp-content/uploads/images/versiyon/660x495/toyota/camry/sedan/2024/2024-toyota-camry-111.jpg",
+      "https://indigodergisi.com/wp-content/uploads/2024/03/Toyota-Camry-LE.jpg"
+    ],
+    "Toyota_Corolla": [],
+    "Toyota_RAV4": [],
+    "Toyota_Highlander": [],
+    "Toyota_Tacoma": [],
+    "Honda_Civic": [],
+    "Honda_Accord": [],
+    "Honda_CR-V": [],
+    "Honda_Pilot": [
+      "https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2024/08/2025-honda-pilot-black-edition.jpg",
+      "https://www.honda.ca/-/media/Brands/Honda/Models/PILOT/2025/Trims/2-EX-L/BAP_VER1/LSM/01_MY25_Pilot_EXL_LSM_3250x2400_Desktop_BAPColourSelector_Front.png?h=2400&iar=0&w=3250&rev=8211a1e16a864d91b358e2905a23d33d&hash=851CC6FD6A7BEA6DC460F93EF0F9A699",
+      "https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2025/11/2026-honda-pilot-elite-exterior-01.jpg?q=49&fit=crop&w=825&dpr=2"
+    ],
+    "Honda_Odyssey": [],
+    "Ford_F-150": [],
+    "Ford_Mustang": [],
+    "Ford_Explorer": [],
+    "Ford_Escape": [],
+    "Ford_Bronco": [],
+    "Chevrolet_Silverado": [],
+    "Chevrolet_Equinox": [],
+    "Chevrolet_Malibu": [],
+    "Chevrolet_Tahoe": [],
+    "Chevrolet_Camaro": [],
+    "BMW_3 Series": [],
+    "BMW_5 Series": [],
+    "BMW_X3": [
+      "https://autotijd.be/images/bmw/2021/x3/facelift/bmw-x3-2021-01.jpg",
+      "https://i0.shbdn.com/photos/01/33/42/x5_1298013342ugv.jpg",
+      "https://i0.shbdn.com/photos/01/33/42/x5_12980133424we.jpg"
+    ],
+    "BMW_X5": [],
+    "BMW_M4": [],
+    "Mercedes-Benz_C-Class": [],
+    "Mercedes-Benz_E-Class": [],
+    "Mercedes-Benz_GLC": [
+      "https://get.wallhere.com/photo/car-vehicle-Mercedes-Benz-side-view-wheel-land-vehicle-automotive-design-automotive-exterior-automobile-make-luxury-vehicle-crossover-suv-sport-utility-vehicle-auto-show-compact-sport-utility-vehicle-glc-class-x253-mercedes-benz-m-class-mercedes-benz-glk-class-mercedes-benz-gl-class-561433.jpg",
+      "https://www.arabalar.com.tr/wp-content/uploads/images/versiyon/660x495/mercedes/glc/suv/2024/2024-mercedes-glc-111.jpg",
+      "https://en.arabgt.com/wp-content/uploads/2023/08/New-Mercedes-GLC-2024.jpg"
+    ],
+    "Mercedes-Benz_GLE": [],
+    "Mercedes-Benz_S-Class": [],
+    "Audi_A4": [],
+    "Audi_Q5": [],
+    "Audi_A6": [
+      "https://images6.alphacoders.com/554/thumb-1920-554908.jpg",
+      "https://wallpaperaccess.com/full/1663622.jpg",
+      "https://wallpaperaccess.com/full/9795978.jpg"
+    ],
+    "Audi_Q7": [
+      "https://images2.alphacoders.com/103/thumb-1920-1030854.jpg",
+      "https://images.carexpert.com.au/crop/1200/630/app/uploads/2024/01/2025-audi-q7-5.jpg",
+      "https://www.usnews.com/object/image/0000018b-ac94-d133-a3ff-bddc1d460000/https-cars-dms-usnews-com-static-uploads-images-auto-custom-14062-original-2020-audi-q7-exterior-3.jpg?update-time=1584980311000&size=responsiveGallery"
+    ],
+    "Audi_e-tron": [],
+    "Tesla_Model 3": [],
+    "Tesla_Model Y": [
+      "https://www.motortrend.com/files/6792fb96636561000870ebbf/2026teslamodelyjuniperuslaunch25.jpg",
+      "https://www.carscoops.com/wp-content/uploads/2023/10/Tesla-Model-Y-RWD-1.jpg",
+      "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-Y-2-Social.png"
+    ],
+    "Tesla_Model S": [],
+    "Tesla_Model X": [],
+    "Nissan_Altima": [],
+    "Nissan_Rogue": [
+      "https://get.wallhere.com/photo/car-vehicle-Nissan-2015-netcarshow-netcar-car-images-car-photo-wheel-Qashqai-land-vehicle-automotive-exterior-automobile-make-bumper-crossover-suv-sport-utility-vehicle-compact-sport-utility-vehicle-nissan-qashqai-nissan-rogue-451441.jpg",
+      "https://get.wallhere.com/photo/car-vehicle-Nissan-Ford-netcarshow-netcar-car-images-car-photo-2017-Rogue-One-Star-Wars-Limited-Edition-land-vehicle-automotive-exterior-automobile-make-crossover-suv-sport-utility-vehicle-compact-sport-utility-vehicle-448247.jpg",
+      "https://www.motorbiscuit.com/wp-content/uploads/2022/09/2023-Nissan-Rogue-Sport.jpg"
+    ],
+    "Nissan_Sentra": [],
+    "Nissan_Pathfinder": [],
+    "Nissan_Frontier": [
+      "https://www.jimkerasnissan.com/inventoryphotos/19585/1n6ed1ej4tn621389/ip/2.jpg?timestamp=2025-11-20T20:15:48Z&bg-color=FFFFFF&width=400+400w",
+      "https://www.mynissan.org/assets/stock/colormatched_02/transparent/1280/cc_2026nit12_02_1280/cc_2026nit121996219_02_1280_kad.png?timestamp=0001-01-01T00:00:00&bg-color=FFFFFF&width=800+800w",
+      "https://www.topgear.com/sites/default/files/2026/02/2-Nissan-Frontier-US-review-2026.jpg"
+    ],
+    "Hyundai_Elantra": [],
+    "Hyundai_Tucson": [],
+    "Hyundai_Santa Fe": [],
+    "Hyundai_Sonata": [],
+    "Hyundai_Palisade": []
+  },
+  "aksesuar_resimleri": {
+    "Michelin Alpin 6 kış lastiği": [],
+    "17 inç spor alüminyum jant": [],
+    "Pioneer AVH araç multimedya ekranı": [
+      "https://www.courtsmammouth.mu/rodrigues/52202-product_set/pioneer-avh-z7250bt-7-car-touch-screen-multimedia.jpg"
+    ],
+    "3D havuzlu araç paspas": [],
+    "Premium suni deri oto koltuk kılıfı": [],
+    "Çift kameralı araç içi ayna kamera": [
+      "https://mersineticaret.com/wp-content/uploads/2020/04/profesyonel-yol-kayıt-kamerasi-1-600x500.png"
+    ],
+    "Bose 6.5 inç araç hoparlör": [],
+    "Katlanabilir araç bagaj düzenleyici": [
+      "https://m.media-amazon.com/images/S/aplus-media-library-service-media/0136dac1-76b6-4667-9679-842bad094542.__CR0,0,970,600_PT0_SX970_V1___.jpg"
+    ],
+    "H7 LED far ampulü beyaz": [],
+    "400 litre araç çatı portbagajı": [],
+    "9H profesyonel seramik kaplama": [],
+    "Oto kokusu havalandırma klips": [],
+    "65W araç şarj cihazı USB-C": [],
+    "D1S Xenon far ampulü": [
+      "https://www.hepparca.tr/idea/pv/25/myassets/products/148/opel-insignia-d1s-xenon-ampul-gaz-desa-ac0-f7.png?revision=1757924352"
+    ],
+    "Hakiki deri direksiyon kılıfı": [],
+    "Universal araç çamurluk seti": [],
+    "Manyetik torpido üstü telefon tutucu": [],
+    "%35 koyuluk araç cam filmi": [],
+    "12V araç içi buzdolabı": [],
+    "Arka tampon koruma plastiği": []
+  }
+}

@@ -1,4 +1,4 @@
-import { Kullanici } from "@/tipler/Kullanici";
+import { Kullanici } from "../tipler";
 import { Aksesuar, Araba } from '../tipler';
 
 const MARKALAR = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Nissan', 'Hyundai'];
@@ -189,46 +189,53 @@ export const sahteArabalarUret = (kullanicilar: Kullanici[]): Araba[] => {
   const arabalar: Araba[] = [];
   const kullaniciIdleri = kullanicilar.map((k: Kullanici) => k.id);
 
-  for (let i = 1; i <= 100; i++) {
-    const marka = MARKALAR[Math.floor(Math.random() * MARKALAR.length)];
-    const model = MODELLER[marka][Math.floor(Math.random() * MODELLER[marka].length)];
-    const yil = 2010 + Math.floor(Math.random() * 16);
-    const fiyat = 300000 + Math.floor(Math.random() * 2500000);
-    const kilometre = Math.floor(Math.random() * 200000);
-    const yakitTuru = marka === 'Tesla' ? 'Elektrik' : YAKIT_TURLERI[Math.floor(Math.random() * YAKIT_TURLERI.length)];
-    const vites = VITES_TURLERI[Math.floor(Math.random() * VITES_TURLERI.length)];
-    const saticiId = kullaniciIdleri[Math.floor(Math.random() * kullaniciIdleri.length)];
-    const aciklama = `${marka} ${model}. ` + ACIKLAMALAR[Math.floor(Math.random() * ACIKLAMALAR.length)];
+  let i = 1;
+  for (const marka of MARKALAR) {
+    if (!MODELLER[marka]) continue;
+    for (const model of MODELLER[marka]) {
+      const yil = 2010 + Math.floor(Math.random() * 16);
+      const fiyat = 300000 + Math.floor(Math.random() * 2500000);
+      const kilometre = Math.floor(Math.random() * 200000);
+      const yakitTuru = marka === 'Tesla' ? 'Elektrik' : YAKIT_TURLERI[Math.floor(Math.random() * YAKIT_TURLERI.length)];
+      const vites = VITES_TURLERI[Math.floor(Math.random() * VITES_TURLERI.length)];
+      const saticiId = kullaniciIdleri[Math.floor(Math.random() * kullaniciIdleri.length)];
+      const aciklama = `${marka} ${model}. ` + ACIKLAMALAR[Math.floor(Math.random() * ACIKLAMALAR.length)];
 
-    const numFeatures = 3 + Math.floor(Math.random() * 5);
-    const shuffledFeatures = [...OZELLIKLER_LISTESI].sort(() => 0.5 - Math.random());
-    const ozellikler = shuffledFeatures.slice(0, numFeatures);
+      const ilanTarihi = new Date();
+      ilanTarihi.setDate(ilanTarihi.getDate() - Math.floor(Math.random() * 30));
 
-    const modelKey = `${marka}_${model}`;
-    const modelResimleri = MODEL_RESIMLERI[modelKey];
+      const numFeatures = 3 + Math.floor(Math.random() * 5);
+      const shuffledFeatures = [...OZELLIKLER_LISTESI].sort(() => 0.5 - Math.random());
+      const ozellikler = shuffledFeatures.slice(0, numFeatures);
 
-    const resimIndex1 = i % GERCEK_RESIMLER.length;
-    const resimIndex2 = (i + 7) % GERCEK_RESIMLER.length;
-    const resimIndex3 = (i + 13) % GERCEK_RESIMLER.length;
+      const modelKey = `${marka}_${model}`;
+      const modelResimleri = MODEL_RESIMLERI[modelKey];
 
-    const anaResim = modelResimleri ? modelResimleri[0] : (MARKA_RESIMLERI[marka] || GERCEK_RESIMLER[resimIndex1]);
-    const digerResim1 = modelResimleri && modelResimleri[1] ? modelResimleri[1] : GERCEK_RESIMLER[resimIndex2];
-    const digerResim2 = modelResimleri && modelResimleri[2] ? modelResimleri[2] : GERCEK_RESIMLER[resimIndex3];
+      const resimIndex1 = i % GERCEK_RESIMLER.length;
+      const resimIndex2 = (i + 7) % GERCEK_RESIMLER.length;
+      const resimIndex3 = (i + 13) % GERCEK_RESIMLER.length;
 
-    arabalar.push({
-      id: `araba-${i}`,
-      saticiId,
-      marka,
-      model,
-      yil,
-      fiyat,
-      kilometre,
-      vites,
-      yakitTuru,
-      resimler: [anaResim, digerResim1, digerResim2],
-      aciklama,
-      ozellikler
-    });
+      const anaResim = modelResimleri ? modelResimleri[0] : (MARKA_RESIMLERI[marka] || GERCEK_RESIMLER[resimIndex1]);
+      const digerResim1 = modelResimleri && modelResimleri[1] ? modelResimleri[1] : GERCEK_RESIMLER[resimIndex2];
+      const digerResim2 = modelResimleri && modelResimleri[2] ? modelResimleri[2] : GERCEK_RESIMLER[resimIndex3];
+
+      arabalar.push({
+        id: `araba-${i}`,
+        saticiId,
+        marka,
+        model,
+        yil,
+        fiyat,
+        kilometre,
+        vites,
+        yakitTuru,
+        resimler: [anaResim, digerResim1, digerResim2],
+        aciklama,
+        ozellikler,
+        ilanTarihi: ilanTarihi.toISOString(),
+      } as Araba);
+      i++;
+    }
   }
 
   return arabalar;
@@ -239,19 +246,19 @@ const AKSESUAR_VERILERI: { ad: string; kategori: string; resim: string; aciklama
   {
     ad: 'Michelin Kış Lastiği Seti',
     kategori: 'Lastik & Jant',
-    resim: 'https://images.unsplash.com/photo-1621993202323-f438eec934ff?w=800&q=80',
+    resim: 'https://images.unsplash.com/photo-1598440590456-5ea5040eebfb?w=800&q=80',
     aciklama: 'Michelin Alpin 6 kış lastiği seti, 4 adet. 205/55R16 boyutunda. Üstün yol tutuşu ve kısa fren mesafesi.'
   },
   {
     ad: 'Sport Alüminyum Jant Seti',
     kategori: 'Lastik & Jant',
-    resim: 'https://images.unsplash.com/photo-1611821064430-0d40291d0f0b?w=800&q=80',
+    resim: 'https://images.unsplash.com/photo-1590422749874-9a4f47cc0855?w=800&q=80',
     aciklama: '17 inç alüminyum alaşım jant seti. 4 adet. Hafif ve dayanıklı, araç performansını artırır.'
   },
   {
     ad: 'Pioneer Multimedya Ekranı',
     kategori: 'Elektronik',
-    resim: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
+    resim: 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=800&q=80',
     aciklama: 'Pioneer AVH-Z9200DAB 7 inç dokunmatik ekran. Apple CarPlay ve Android Auto uyumlu.'
   },
   {
@@ -263,13 +270,13 @@ const AKSESUAR_VERILERI: { ad: string; kategori: string; resim: string; aciklama
   {
     ad: 'Deri Koltuk Kılıfı Seti',
     kategori: 'İç Aksesuar',
-    resim: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
+    resim: 'https://images.unsplash.com/photo-1563717208170-40e8b159f935?w=800&q=80',
     aciklama: 'Premium suni deri koltuk kılıfı seti. 5 koltuk tam set. Su geçirmez ve kolay temizlenir.'
   },
   {
     ad: 'Araç İçi Kameralı Ayna',
     kategori: 'Elektronik',
-    resim: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=80',
+    resim: 'https://images.unsplash.com/photo-1534969248232-a56d982ec844?w=800&q=80',
     aciklama: 'Çift kameralı araç içi ayna. Full HD kayıt, gece görüş özellikli. 32GB hafıza kartı dahil.'
   },
   {
@@ -281,7 +288,7 @@ const AKSESUAR_VERILERI: { ad: string; kategori: string; resim: string; aciklama
   {
     ad: 'Bagaj Düzenleyici Organizatör',
     kategori: 'İç Aksesuar',
-    resim: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
+    resim: 'https://images.unsplash.com/photo-1490237722416-042858cb28db?w=800&q=80',
     aciklama: 'Katlanabilir bagaj düzenleyici. Çok bölmeli, su geçirmez taban. Her araca uyumlu.'
   },
   {

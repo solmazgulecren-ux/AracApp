@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AcikTema, KoyuTema } from '../../sabitler/Tema';
 import { KullanimDurumTipi, useKullanimDurum } from '../../durum/kullanimDurum';
+import { toastGosterGlobal } from '../../bilesenler/ToastBildirim';
 
 export default function SekmelerYerlesim() {
   const karanlikMod = useKullanimDurum((state: KullanimDurumTipi) => state.karanlikMod);
@@ -32,23 +33,31 @@ export default function SekmelerYerlesim() {
   };
 
   const UstAlanButonlari = () => (
-    <View style={stiller.ustGrup}>
-      {/* ⚙️ Yönetim Paneli Butonu */}
-      <TouchableOpacity
-        style={[stiller.yonetimPanelButon, { backgroundColor: tema.kartArkaplan, borderColor: tema.anaRenk }]}
-        onPress={adminSayfasinaGit}
-      >
-        <Ionicons name="shield-checkmark" size={12} color={tema.anaRenk} />
-        <Text style={[stiller.yonetimPanelMetni, { color: tema.anaRenk }]}>ADMİN</Text>
-      </TouchableOpacity>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={stiller.ustGrup}>
+      {/* ⚙️ Yönetim Paneli Butonu (Sadece Adminlere Görünür) */}
+      {aktifKullanici?.isAdmin && (
+        <TouchableOpacity
+          style={[stiller.yonetimPanelButon, { backgroundColor: tema.kartArkaplan, borderColor: tema.anaRenk }]}
+          onPress={adminSayfasinaGit}
+        >
+          <Ionicons name="shield-checkmark" size={12} color={tema.anaRenk} />
+          <Text style={[stiller.yonetimPanelMetni, { color: tema.anaRenk }]}>ADMİN</Text>
+        </TouchableOpacity>
+      )}
 
       {/* İlan Ver Butonu */}
       <TouchableOpacity
         style={[stiller.ilanButon, { backgroundColor: tema.basari }]}
-        onPress={() => router.push('/ilanver')}
+        onPress={() => {
+          if (!aktifKullanici) {
+            toastGosterGlobal('İlan verebilmek için lütfen giriş yapınız', 'hata');
+          } else {
+            router.push('/ilanver');
+          }
+        }}
       >
-        <Ionicons name="add-circle" size={16} color="#FFF" />
-        <Text style={stiller.ilanButonMetni}>İlan Ver</Text>
+        <Ionicons name="add-circle" size={14} color="#FFF" />
+        <Text style={stiller.ilanButonMetni}>İlan</Text>
       </TouchableOpacity>
 
       {/* Chatbot Butonu */}
@@ -80,12 +89,14 @@ export default function SekmelerYerlesim() {
       <TouchableOpacity style={stiller.ikonButon} onPress={temaDegistir}>
         <Ionicons name={karanlikMod ? 'sunny' : 'moon'} size={20} color={tema.metin} />
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 
   return (
     <Tabs
       screenOptions={{
+        headerTitleAlign: 'left',
+        headerTitleStyle: { fontSize: 16, fontWeight: 'bold' },
         headerRight: () => <UstAlanButonlari />,
         headerStyle: {
           backgroundColor: tema.kartArkaplan,
@@ -138,6 +149,7 @@ const stiller = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    paddingRight: 15,
   },
   yonetimPanelButon: {
     flexDirection: 'row',

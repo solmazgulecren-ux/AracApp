@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { toastGosterGlobal } from '../../bilesenler/ToastBildirim';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AcikTema, KoyuTema } from '../../sabitler/Tema';
 import { Araba, Siparis, SiparisUrun } from '../../tipler';
@@ -27,20 +28,40 @@ export default function ProfilEkrani() {
   const kullaniciSiparisleri = siparisler.filter((s: Siparis) => s.kullaniciId === aktifKullanici?.id);
   const profilGuncelle = useKullanimDurum((state: KullanimDurumTipi) => state.profilGuncelle);
 
+  const [cikisModalGoster, setCikisModalGoster] = useState(false);
+
   const kaydet = () => {
     if (aktifKullanici) {
       profilGuncelle(aktifKullanici.id, { ad, soyad, telefon, adres });
       setDuzenleMod(false);
+      toastGosterGlobal('Profil başarıyla güncellendi.', 'basari');
     }
   };
 
   const cikisIslemi = () => {
+    setCikisModalGoster(true);
+  };
+
+  const cikisOnayla = () => {
+    setCikisModalGoster(false);
     cikisYap();
+    toastGosterGlobal('Başarıyla çıkış yapıldı.', 'bilgi');
     router.replace('/');
   };
 
-  if (!aktifKullanici) return null;
-
+  if (!aktifKullanici) {
+    return (
+      <View style={[stiller.anaKutu, { backgroundColor: tema.arkaplan, justifyContent: 'center', alignItems: 'center' }]}>
+        <Ionicons name="person-circle-outline" size={80} color={tema.metinAcik} />
+        <Text style={[stiller.profilAd, { color: tema.metin, marginTop: 16, marginBottom: 8 }]}>Giriş Yapmadınız</Text>
+        <Text style={[stiller.profilEposta, { color: tema.metinAcik, textAlign: 'center', marginBottom: 24 }]}>Profilinizi görüntülemek ve işlem yapmak için giriş yapmalısınız.</Text>
+        <TouchableOpacity style={[stiller.adminButon, { backgroundColor: tema.anaRenk }]} onPress={() => router.push('/')}>
+          <Ionicons name="log-in-outline" size={20} color="#FFF" />
+          <Text style={stiller.cikisMetni}>Giriş Yap / Kayıt Ol</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   // Sipariş durumu renk ve ilerleme yüzdesi
   const durumBilgisi = (durum: Siparis['durum']) => {
     switch (durum) {
@@ -149,6 +170,20 @@ export default function ProfilEkrani() {
           )}
         </View>
       </Animated.View>
+
+      {/* Profil Altı Aksiyonlar */}
+      <View style={{ flexDirection: 'row', paddingHorizontal: 14, marginTop: 10, gap: 10 }}>
+        {aktifKullanici.isAdmin && (
+          <TouchableOpacity style={[stiller.adminButon, { flex: 1, backgroundColor: tema.ikincilRenk, margin: 0 }]} onPress={() => router.push('/admin' as any)}>
+            <Ionicons name="shield-checkmark" size={18} color="#FFF" />
+            <Text style={[stiller.cikisMetni, { fontSize: 14 }]}>Yönetim</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={[stiller.cikisButon, { flex: 1, backgroundColor: tema.kartArkaplan, borderColor: tema.uyariKirmizi, margin: 0, marginBottom: 0, borderWidth: 1 }]} onPress={cikisIslemi}>
+          <Ionicons name="log-out-outline" size={18} color={tema.uyariKirmizi} />
+          <Text style={[stiller.cikisMetniKirmizi, { color: tema.uyariKirmizi, fontSize: 14 }]}>Çıkış Yap</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Sekmeler */}
       <View style={stiller.sekmeler}>
@@ -287,19 +322,26 @@ export default function ProfilEkrani() {
         </View>
       )}
 
-      {/* Yönetim Paneli Butonu (Adminlere Özel) */}
-      {aktifKullanici.isAdmin && (
-        <TouchableOpacity style={[stiller.adminButon, { backgroundColor: tema.ikincilRenk }]} onPress={() => router.push('/admin' as any)}>
-          <Ionicons name="shield-checkmark" size={20} color="#FFF" />
-          <Text style={stiller.cikisMetni}>Yönetim Paneli</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Çıkış Butonu */}
-      <TouchableOpacity style={[stiller.cikisButon, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]} onPress={cikisIslemi}>
-        <Ionicons name="log-out-outline" size={20} color={tema.uyariKirmizi} />
-        <Text style={[stiller.cikisMetniKirmizi, { color: tema.uyariKirmizi }]}>Çıkış Yap</Text>
-      </TouchableOpacity>
+      {/* Çıkış Yap Modal */}
+      <Modal transparent visible={cikisModalGoster} animationType="fade">
+        <View style={stiller.modalArkaplan}>
+          <View style={[stiller.modalKutu, { backgroundColor: tema.kartArkaplan, borderColor: tema.kenarlik }]}>
+            <View style={[stiller.modalIkonKutu, { backgroundColor: tema.uyariKirmizi + '15' }]}>
+              <Ionicons name="log-out-outline" size={28} color={tema.uyariKirmizi} />
+            </View>
+            <Text style={[stiller.modalBaslik, { color: tema.metin }]}>Çıkış Yap</Text>
+            <Text style={[stiller.modalMetin, { color: tema.metinAcik }]}>Hesabınızdan çıkış yapmak istediğinize emin misiniz?</Text>
+            <View style={stiller.modalButonGrup}>
+              <TouchableOpacity onPress={() => setCikisModalGoster(false)} style={[stiller.modalButon, { backgroundColor: tema.yuzeyRenk }]}>
+                <Text style={[stiller.modalButonMetni, { color: tema.metin }]}>İptal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={cikisOnayla} style={[stiller.modalButon, stiller.modalCikisButon, { backgroundColor: tema.uyariKirmizi }]}>
+                <Text style={stiller.modalCikisMetni}>Çıkış Yap</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -390,12 +432,21 @@ const stiller = StyleSheet.create({
     borderBottomWidth: 1,
   },
   urunAd: { flex: 1, fontSize: 13, marginRight: 10 },
-  urunFiyat: { fontSize: 13, fontWeight: '600' },
-  siparisToplamSatir: {
-    flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, marginTop: 6,
-  },
+  urunFiyat: { fontSize: 13, fontWeight: 'bold' },
+  siparisToplamSatir: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, marginTop: 10, borderTopWidth: 1, borderTopColor: '#F3F4F6' },
   siparisToplamEtiket: { fontSize: 15, fontWeight: 'bold' },
-  siparisToplamFiyat: { fontSize: 16, fontWeight: 'bold' },
+  siparisToplamFiyat: { fontSize: 18, fontWeight: 'bold' },
+  // Modal Stilleri
+  modalArkaplan: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalKutu: { width: '85%', maxWidth: 400, borderRadius: 20, padding: 24, borderWidth: 1, alignItems: 'center', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10 },
+  modalIkonKutu: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  modalBaslik: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+  modalMetin: { fontSize: 15, textAlign: 'center', marginBottom: 24, lineHeight: 22 },
+  modalButonGrup: { flexDirection: 'row', gap: 12, width: '100%' },
+  modalButon: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  modalButonMetni: { fontSize: 15, fontWeight: '600' },
+  modalCikisButon: { elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  modalCikisMetni: { fontSize: 15, fontWeight: 'bold', color: '#FFF' },
   // Butonlar
   cikisButon: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

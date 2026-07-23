@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import 'react-native-reanimated';
 import { ToastBildirim } from '../bilesenler/ToastBildirim';
 import { KullanimDurumTipi, useKullanimDurum } from '../durum/kullanimDurum';
@@ -11,6 +12,16 @@ export default function KokYerlesim() {
 
   useEffect(() => {
     verileriYukle();
+
+    if (Platform.OS === 'web') {
+      const style = document.createElement('style');
+      style.textContent = `
+        input:focus, textarea:focus, select:focus {
+          outline: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }, []);
 
   return (
