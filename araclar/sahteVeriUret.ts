@@ -1,5 +1,5 @@
-import { Kullanici } from "../tipler";
 import { Aksesuar, Araba } from '../tipler';
+import { MODEL_RESIMLERI, AKSESUAR_RESIMLERI } from './gorseller';
 
 const MARKALAR = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Nissan', 'Hyundai'];
 const MODELLER: Record<string, string[]> = {
@@ -48,72 +48,7 @@ const GERCEK_RESIMLER = [
   'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=80', // SUV BMW
 ];
 
-// 10 farklı araç modeli için çok şık ve gerçeğe yakın görsel URL'leri haritası
-const MODEL_RESIMLERI: Record<string, string[]> = {
-  'BMW_3 Series': [
-    'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80',
-    'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&q=80',
-    'https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=800&q=80'
-  ],
-  'BMW_5 Series': [
-    'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&q=80',
-    'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80',
-    'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&q=80'
-  ],
-  'Mercedes-Benz_C-Class': [
-    'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80',
-    'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80',
-    'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&q=80'
-  ],
-  'Mercedes-Benz_E-Class': [
-    'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80',
-    'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80',
-    'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&q=80'
-  ],
-  'Audi_A4': [
-    'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80',
-    'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800&q=80',
-    'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=800&q=80'
-  ],
-  'Audi_Q5': [
-    'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800&q=80',
-    'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80',
-    'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800&q=80'
-  ],
-  'Tesla_Model 3': [
-    'https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&q=80',
-    'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=800&q=80',
-    'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&q=80'
-  ],
-  'Tesla_Model Y': [
-    'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=800&q=80',
-    'https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&q=80',
-    'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&q=80'
-  ],
-  'Ford_Mustang': [
-    'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80',
-    'https://images.unsplash.com/photo-1611245801312-51a3a022de44?w=800&q=80',
-    'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&q=80'
-  ],
-  'Toyota_Corolla': [
-    'https://images.unsplash.com/photo-1629897048514-3dd7414272aa?w=800&q=80',
-    'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&q=80',
-    'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=80'
-  ]
-};
-
-const MARKA_RESIMLERI: Record<string, string> = {
-  'Toyota': 'https://images.unsplash.com/photo-1629897048514-3dd7414272aa?w=800&q=80',
-  'Honda': 'https://images.unsplash.com/photo-1610901598285-0d2f0998fde0?w=800&q=80',
-  'Ford': 'https://images.unsplash.com/photo-1551830116-d9818cf5efa6?w=800&q=80',
-  'Chevrolet': 'https://images.unsplash.com/photo-1552519507-da3b142c6e3b?w=800&q=80',
-  'BMW': 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80',
-  'Mercedes-Benz': 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80',
-  'Audi': 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80',
-  'Tesla': 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&q=80',
-  'Nissan': 'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&q=80',
-  'Hyundai': 'https://images.unsplash.com/photo-1650383794301-44bbab9a3e63?w=800&q=80'
-};
+// Görseller haritası `gorseller.ts` içerisinden çekiliyor.
 
 export const MARKALAR_LISTESI = MARKALAR;
 export const MODELLER_LISTESI = MODELLER;
@@ -215,7 +150,7 @@ export const sahteArabalarUret = (kullanicilar: Kullanici[]): Araba[] => {
       const resimIndex2 = (i + 7) % GERCEK_RESIMLER.length;
       const resimIndex3 = (i + 13) % GERCEK_RESIMLER.length;
 
-      const anaResim = modelResimleri ? modelResimleri[0] : (MARKA_RESIMLERI[marka] || GERCEK_RESIMLER[resimIndex1]);
+      const anaResim = modelResimleri && modelResimleri[0] ? modelResimleri[0] : GERCEK_RESIMLER[resimIndex1];
       const digerResim1 = modelResimleri && modelResimleri[1] ? modelResimleri[1] : GERCEK_RESIMLER[resimIndex2];
       const digerResim2 = modelResimleri && modelResimleri[2] ? modelResimleri[2] : GERCEK_RESIMLER[resimIndex3];
 
@@ -384,7 +319,7 @@ export const sahteAksesuarlarUret = (kullanicilar: Kullanici[]): Aksesuar[] => {
       fiyat,
       durum,
       aciklama: veri.aciklama,
-      resimler: [veri.resim],
+      resimler: AKSESUAR_RESIMLERI[veri.ad] && AKSESUAR_RESIMLERI[veri.ad].length > 0 ? AKSESUAR_RESIMLERI[veri.ad] : [veri.resim],
       kategori: veri.kategori,
       stok
     });

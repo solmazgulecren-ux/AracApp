@@ -326,12 +326,10 @@ export const useKullanimDurum = create<KullanimDurumTipi>()(
       },
 
       verileriYukle: () => {
-        if (get().kullanicilar.length === 0) {
-          const sahteKullanicilar = sahteKullanicilarUret();
-          const sahteArabalar = sahteArabalarUret(sahteKullanicilar);
-          const sahteAksesuarlar = sahteAksesuarlarUret(sahteKullanicilar);
-          set({ kullanicilar: sahteKullanicilar, arabalar: sahteArabalar, aksesuarlar: sahteAksesuarlar });
-        }
+        const sahteKullanicilar = get().kullanicilar.length === 0 ? sahteKullanicilarUret() : get().kullanicilar;
+        const sahteArabalar = sahteArabalarUret(sahteKullanicilar);
+        const sahteAksesuarlar = sahteAksesuarlarUret(sahteKullanicilar);
+        set({ kullanicilar: sahteKullanicilar, arabalar: sahteArabalar, aksesuarlar: sahteAksesuarlar });
       },
 
       siparisDurumuGuncelle: (siparisId, yeniDurum) => {
