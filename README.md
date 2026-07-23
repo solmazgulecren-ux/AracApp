@@ -59,6 +59,6 @@ Projeyi lokal bilgisayarınızda çalıştırmak için aşağıdaki adımları t
 *   **Lucide Icons / Expo Vector Icons:** Vektörel ve yüksek çözünürlüklü ikon kütüphaneleri.
 
 ## 👤 Geliştirici & Lisans
-Tasarım ve Geliştirme: **Solmaz Güleçren**
+Tasarım ve Geliştirme: **Ecren Solmazgül**
 
 Bu proje portfolyo amacı ile açık kaynaklı olarak geliştirilmiştir.
